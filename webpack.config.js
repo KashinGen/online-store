@@ -12,11 +12,21 @@ module.exports = {
 	mode,
 	target,
 	devtool,
+	devServer: {
+		port: 3000,
+		historyApiFallback: true,
+		contentBase: "./src",
+
+	},
     entry: path.resolve(__dirname, './src/index.ts'),
 	output: {
 		filename: '[name].js',
+		publicPath: "/",
 		path: path.resolve(__dirname, 'dist'),
 	},
+    resolve: {
+        extensions: ['.ts', '.js', 'd.ts'],
+    },
 	plugins: [
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, './src/index.html'),
