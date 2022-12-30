@@ -1,6 +1,20 @@
+const conteiner: Element | null = document.querySelector('.conteiner');
 
-const conteiner = document.querySelector('.conteiner');
-
+interface Idata {
+    products:{
+    id: number,
+    title:string,
+    description:string,
+    price:number,
+    discountPercentage:number,
+    rating:number,
+    stock:number,
+    brand:string,
+    category:string,
+    thumbnail:string,
+    images:string[],
+    }
+}
 const data = {
     "products": [
     {
@@ -76,10 +90,7 @@ const data = {
     }]
     }
    
-
-
-
-function makeBasket () :void {
+function makeBasket (el: Element) :void {
     // conteiner.innerHTML = '';
     const wrapper: HTMLDivElement| null = document.createElement('div');
     if(conteiner){
@@ -155,7 +166,8 @@ leftColum.insertAdjacentHTML('afterend', block2)
 
 }}
 
-makeBasket()
+if(conteiner){
+makeBasket(conteiner)}
 
 function totalCost (){
   let totalCost =  document.querySelector('.total_cost');
