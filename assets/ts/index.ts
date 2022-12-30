@@ -79,9 +79,10 @@ const data = {
 
 
 
-function makeBin (obj)  {
+function makeBasket () :void {
     // conteiner.innerHTML = '';
-    const wrapper = document.createElement('div');
+    const wrapper: HTMLDivElement| null = document.createElement('div');
+    if(conteiner){
     conteiner.appendChild(wrapper)
     wrapper.classList.add('wrapper');
     const leftColum = document.createElement('div');
@@ -89,60 +90,59 @@ function makeBin (obj)  {
     wrapper
             .appendChild(leftColum)
             .appendChild(rigthColum)
-   
-    //левая часть
-
- 
-
-function repitMakeTable(array, number){
+        
     
-    const block1 = `  <div class="show-product";
-    flex-direction: column-reverse;">
-    <div class="show-product_title">
-        <span class="text">Products In Cart</span>
-        <div class="wrapper-porduct">
-            <div class="number">
-                <span>${number+1}</span>
-            </div>
-            <div class="content">
-                <div class="photo-product"><img src="${data.products[number].images[0]}" alt="prohoto-product"></div>
-                <div class="info-product">
-                    <div class="title-product">${data.products[number].title}</div>
-                    <div class="description-product">${data.products[number].description}</div>
-                    <div class="statistics">
-                        <spann class="rating">${data.products[number].rating}</spann>
-                        <spann class="discount">${data.products[number].discountPercentage}</spann>
+//левая часть где отображают продукты в корзине
+        function repitMakeTable(number : number): void{
+
+            const block1 = `  <div class="show-product";
+            flex-direction: column-reverse;">
+            <div class="show-product_title">
+                <span class="text">Products In Cart</span>
+                <div class="wrapper-porduct">
+                    <div class="number">
+                        <span>${number+1}</span>
+                    </div>
+                    <div class="content">
+                        <div class="photo-product"><img src="${data.products[number].images[0]}" alt="prohoto-product"></div>
+                        <div class="info-product">
+                            <div class="title-product">${data.products[number].title}</div>
+                            <div class="description-product">${data.products[number].description}</div>
+                            <div class="statistics">
+                                <spann class="rating">${data.products[number].rating}</spann>
+                                <spann class="discount">${data.products[number].discountPercentage}</spann>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="count">
+                            <span class="title-stock">Stock</span>
+                            <div>
+                                <button class="plus">+</button>
+                                <span class="for-order">1</span>
+                                <button class="minus">-</button>
+                            </div>
+                            <span class="price">${data.products[number].price}$</span>
                     </div>
                 </div>
             </div>
-            <div class="count">
-                    <span class="title-stock">Stock</span>
-                    <div>
-                        <button class="plus">+</button>
-                        <span class="for-order">1</span>
-                        <button class="minus">-</button>
-                    </div>
-                    <span class="price">${data.products[number].price}$</span>
-            </div>
-        </div>
-    </div>
-</div>      `
+        </div>      `
+        const text :HTMLElement | null = document.querySelector('.text')
 
-document.querySelector('.text').insertAdjacentHTML('afterend', block1)
-}
+        if(text){
+            text.insertAdjacentHTML('afterend', block1)}
+            }
 
-const showProductTitle = document.createElement('div');
+const showProductTitle: HTMLDivElement | null = document.createElement('div');
 showProductTitle.classList.add('reverse');
 leftColum.appendChild(showProductTitle);
 const spanshowProductTitle = document.createElement('span');
 spanshowProductTitle.classList.add('text');
 showProductTitle.appendChild(spanshowProductTitle);
 
-for(let i = 0; i < obj.products.length; i++){
-    repitMakeTable(data, i)
+for(let i = 0; i < data.products.length; i++){
+    repitMakeTable(i)
 }
-
-
+//правая часть где отображается сумма и т.д.
 const block2 = `<div class="summary">
                     <div class="summary-title">Summary</div>
                     <span class = 'sum-products'>Products:</span>
@@ -151,19 +151,22 @@ const block2 = `<div class="summary">
                     <button class='bth-buy-now'type="submit">BUY NOW</button>
                 </div>`
 
-
 leftColum.insertAdjacentHTML('afterend', block2)
-}
-makeBin(data)
 
-function totalCost (data){
+}}
+
+makeBasket()
+
+function totalCost (){
   let totalCost =  document.querySelector('.total_cost');
   let sumProducts = document.querySelector('.sum-products');
   
     let array = [];
+    if(totalCost && sumProducts){
     for(let i = 0; i< data.products.length; i++){
         array.push(data.products[i].price)}
         totalCost.innerHTML= `Total: ${array.reduce((a,b)=>{ return a+b})}$`;
         sumProducts.innerHTML = `Products: ${array.length}`
-  
-}totalCost(data)
+    }
+}
+totalCost()
