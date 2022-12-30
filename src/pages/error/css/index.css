@@ -1,0 +1,33 @@
+.container-error {
+    width:100%;
+    max-width: 1260px;
+    padding: 0 30px;
+    margin: 0 auto;
+    }
+.error{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.error::after{
+    content: 'Sorry, your way is not correct';
+    margin-top: 15px;
+}
+.bth-error{
+    font-size: 20px;
+    width: 200px;
+    height: 3rem;
+    border: 2px solid black;
+    background-color: white;
+    border-radius: 20px;
+    margin-top: 15px;
+}
+.bth-error:hover{
+    transition: all 0.3s;
+    font-size: 25px;
+    cursor: pointer;
+}

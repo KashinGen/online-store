@@ -1,0 +1,122 @@
+.conteiner{
+    width:100%;
+    max-width: 1260px;
+    padding: 0 30px;
+    margin: 0 auto;
+   
+}
+.wrapper{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+.show-product,
+.summary{
+    border: 1px solid black;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    max-height: 20rem;
+}
+.reverse{
+    display: flex;
+    flex-direction: column-reverse;
+}
+.show-product_title{
+    margin: 10px 10px;
+}
+.wrapper-porduct{
+    border-top: 1px solid black;
+    display: grid;
+    grid-template-columns: 30px 7fr 1fr;
+    padding: 10px
+}
+.number{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 15px;
+}
+.number span{
+    border-radius: 25%;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.content{
+    display: grid;
+    grid-template-columns: 2fr 10fr;
+}
+.info-product{
+    margin: auto 20px;
+    text-align: -webkit-center;
+}
+
+.title-product{
+    border-bottom: 1px solid black;
+}
+.photo-product{
+    box-sizing: border-box;
+}
+.photo-product img{
+    width: 100%;
+    border-radius: 10px;
+    border: 0px solid;
+}
+.description-product{
+    margin: 10px;
+}
+ .statistics{
+    display: flex;
+    justify-content: space-between;
+ }
+ .count{
+    align-self: center;
+    text-align: -webkit-center;
+ }
+ .summary{
+    text-align: -webkit-center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+ }
+ .promocode{
+    align-self: center;
+    width: 10rem;
+ }
+ .bth-buy-now{
+    align-self: center;
+    width: 10rem;   
+ }
+
+ .promocode{
+    height: 2rem;
+    border: 1px solid;
+    border-radius: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
+ }
+
+ .bth-buy-now{
+    height: 2rem;
+    border: 2px solid tomato;
+    border-radius: 20px;
+    background-color: goldenrod;}
+
+.bth-buy-now:hover{
+    cursor: pointer;
+    background-color: aqua;
+}
+
+.plus,
+.minus{
+    font-size: 15px;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid black;
+    border-radius: 50%;
+}
+.plus:hover,
+.minus:hover{
+    background-color: tomato;
+    cursor:pointer;
+}
