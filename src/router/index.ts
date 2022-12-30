@@ -46,6 +46,11 @@ const urlLocationHandler = async () => {
     const root = document.getElementById('app');
     if (root) {
         root.innerHTML = html;
+        document.title = route.title;
+        const description = document.querySelector('meta[name="description"]');
+        if (description) {
+            description.setAttribute('content', route.description);
+        }
     }
 };
 
