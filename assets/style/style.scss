@@ -1,0 +1,121 @@
+@import '_reset.scss';
+@import '_variables.scss';
+
+.container {
+    width: 100%;
+    max-width: 1460px;
+    padding:0 30px;
+    margin:0 auto;
+}
+html {
+    height: 100%;
+}
+body {
+    color: $main;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+#app {
+    flex:1;
+}
+.header {
+    &__inner {
+        display: flex;
+        align-items: center;
+        height: 80px;
+        justify-content: space-between;
+
+    }
+    &__logo {
+        transition: all .3s;
+        font-weight: 500;
+        font-size: 30px;
+        line-height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        text-decoration: none;
+        &:active,
+        &:visited {
+            color: $main;
+        }
+        h2 {
+            text-shadow: 0 0 0 $main, 0 0 2px $main, 0 0 4px $main, 0 0 20px $main;
+        }
+    }
+    &__cart {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        &-info {
+            display:flex;
+            font-size: 20px;
+            line-height: 125%;
+        }
+    }
+}
+
+.footer {
+    background-color: $main;
+    padding: 20px 0;
+    &__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #FFFF;
+    }
+    &__author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        a {
+            display: flex;
+            align-items: center;
+            gap:5px;
+            cursor: pointer;
+        }
+    }
+}
+
+@media screen and (hover:hover) {
+
+    .header {
+        &__logo:hover {
+            svg path {
+                fill: $hover-color;
+            }
+            h2 {
+                color: $hover-color;
+                text-shadow: 0 0 0 $hover-color, 0 0 2px $hover-color, 0 0 4px $hover-color, 0 0 20px $hover-color;
+            }
+        }
+        &__cart-link:hover {
+            svg path {
+                fill: $hover-color;
+            }
+        }
+    }
+    .footer {
+        &__author {
+            a:hover {
+                color: $hover-color;
+                svg path {
+                    fill: $hover-color;
+                }
+            }
+        }
+        &__school-link:hover {
+            svg path {
+                stroke: $hover-color;
+            }
+            svg path:nth-child(1),
+            svg path:nth-child(2),
+            svg path:nth-child(3),
+            svg path:nth-child(4) {
+                fill: $hover-color;
+            }
+        }
+    }
+
+}
