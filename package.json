@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/KashinGen/online-store#readme",
   "devDependencies": {
-        "clean-webpack-plugin": "^3.0.0",
         "copy-webpack-plugin": "^7.0.0",
         "css-loader": "^5.2.7",
         "file-loader": "^6.2.0",

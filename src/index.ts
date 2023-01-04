@@ -1,3 +1,4 @@
+import '../assets/style/style.scss';
 import router from './router';
 import { URLRoute } from './router/types';
 

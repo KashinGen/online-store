@@ -17,21 +17,31 @@ const routes: URLRoute = {
     },
 };
 
-document.addEventListener('click', (e) => {
-    e.preventDefault();
-    const target = e.target;
-    if (!target || !(target instanceof HTMLAnchorElement)) return;
-    if (!target.matches('nav a')) return;
-    urlRoute(e);
-});
+const links = document.querySelectorAll('.router-link');
+for (const link of links) {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = e.target;
+        const href = link.closest('.router-link');
+        console.log(href);
+        console.log(href instanceof HTMLAnchorElement);
+        if (!target || !(href instanceof HTMLAnchorElement)) return;
+        if (!href.matches('a')) return;
+        urlRoute(e);
+    });
+}
 
 const urlRoute = (e: Event) => {
     e = e || window.event;
     if (e) {
         e.preventDefault();
-        if (e.target && e.target instanceof HTMLAnchorElement) {
-            window.history.pushState({}, '', e.target.href);
-            urlLocationHandler();
+        const target = e.target;
+        if (target && target instanceof HTMLElement) {
+            const href = target.closest('.router-link');
+            if (e.target && href instanceof HTMLAnchorElement) {
+                window.history.pushState({}, '', href.href);
+                urlLocationHandler();
+            }
         }
     }
 };

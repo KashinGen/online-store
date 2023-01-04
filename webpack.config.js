@@ -36,7 +36,6 @@ module.exports = {
 			filename: 'main.css',
 		}),
         new EslingPlugin({ extensions: 'ts' }),
-        new CleanWebpackPlugin(),
 	],
 	module: {
 		rules: [
