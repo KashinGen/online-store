@@ -17,3 +17,40 @@
 
     }
 }
+.input-search {
+    width: 100%;
+    position: relative;
+    border: 1px solid #cfcfcf;
+    border-radius: 6px;
+    margin-bottom: 30px;
+    &__input {
+        background-color: #fff;
+        width: 100%;
+        font-size: 15px;
+        line-height: 19px;
+        border-radius: 6px;
+        padding: 11px 80px 11px 11px;
+        border: none;
+    }
+    &__btn {
+        width: 42px;
+        height: 42px;
+        right: 0;
+        top: 0;
+        position: absolute;
+        display: block;
+        border: none;
+        background-color: inherit;
+        &::before {
+            background-image: url("../img/search.svg");
+            height: 15px;
+            width: 15px;
+            top: 13px;
+            left: 13px;
+            background-repeat: no-repeat;
+            background-size: contain;
+            position: absolute;
+            content: "";
+        }
+    }
+}
