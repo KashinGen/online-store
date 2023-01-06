@@ -1,9 +1,3 @@
-.container {
-    width:100%;
-    max-width: 1460px;
-    padding: 0 30px;
-    margin: 0 auto;
-    }
 .error{
     display: flex;
     justify-content: center;
@@ -12,11 +6,12 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+    &::after {
+        content: 'Sorry, your way is not correct';
+        margin-top: 15px;
+    }
 }
-.error::after{
-    content: 'Sorry, your way is not correct';
-    margin-top: 15px;
-}
+
 .bth-error{
     font-size: 20px;
     width: 200px;
@@ -26,8 +21,14 @@
     border-radius: 20px;
     margin-top: 15px;
 }
-.bth-error:hover{
-    transition: all 0.3s;
-    font-size: 25px;
-    cursor: pointer;
+
+@media screen and (hover: hover) {
+
+    .bth-error:hover{
+        transition: all 0.3s;
+        font-size: 25px;
+        cursor: pointer;
+    }
+
 }
+
