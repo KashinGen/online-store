@@ -4,7 +4,7 @@ import Select from '../components/Select';
 import InputSearch from '../components/InputSearch';
 import ProductItemComponent from '../components/ProductItemComponent';
 import { ProductItem } from '../models/Product';
-import { Controller, Product, CartItem } from '../types';
+import { Controller, Product, CartItem, ProductViewMode } from '../types';
 import { debounce } from '../util';
 import { OrderSort, Option } from '../types/index';
 
@@ -18,30 +18,47 @@ export class MainController extends Controller {
                 selector: searchWrapper,
                 template: '',
             });
-            const selectWrapper = document.querySelector('.main__controls');
-            if (selectWrapper && selectWrapper instanceof HTMLElement) {
+            const selectSortWrapper = document.querySelector('.main__select-sort');
+
+            if (selectSortWrapper && selectSortWrapper instanceof HTMLElement) {
                 const optionsSort = [
                     { value: 'alphabet', order: OrderSort.ASC, label: 'По алфавиту' },
                     { value: 'price', order: OrderSort.ASC, label: 'По возрастанию цены' },
                     { value: 'price', order: OrderSort.DESC, label: 'По убыванию цены' },
                     { value: 'rating', order: OrderSort.ASC, label: 'По рейтингу' },
                 ];
-                const selected = optionsSort[0];
-                const select = new Select(
+                let selected = optionsSort[0];
+                const selectSort = new Select(
                     selected,
                     optionsSort,
                     this.onSortClickHandler.bind(this),
                     {
-                        selector: selectWrapper,
+                        selector: selectSortWrapper,
                         template: '',
                     }
                 );
-                select.render();
-                // document.querySelector('.main')?.addEventListener('selectionChanged', (evt) => {
-                //     console.log(evt);
-                    
-                // })
-            }
+                selectSort.render();
+                }
+                const selectViewWrapper = document.querySelector('.main__select-view');
+
+                if (selectViewWrapper && selectViewWrapper instanceof HTMLElement) {
+                const optionsView: Option[]= [
+                    { value: ProductViewMode.TABLE, label: 'Таблицей' },
+                    { value: ProductViewMode.LIST, label: 'Списком' },
+                ];
+                const selectedView = optionsView[0];
+                const selectView = new Select(
+                    selectedView,
+                    optionsView,
+                    this.onChangeViewHandler.bind(this),
+                    {
+                        selector: selectViewWrapper,
+                        template: '',
+                    }
+                );
+                selectView.render();
+                }
+            
             const list = document.querySelector('.main__products-list');
             search.render();
             document.querySelector('.input-search__input')?.addEventListener('input', debounce(async (e) => {
@@ -65,6 +82,17 @@ export class MainController extends Controller {
             );
         }
         await this.getData();
+    }
+    onChangeViewHandler(select: Select, option: Option): void {
+        select.changeSelection(option);
+        const list = document.querySelector('.main__products-list');
+        if (list && list instanceof HTMLElement) {
+            if (option.value === ProductViewMode.LIST) {
+                list.classList.add('list');
+            } else {
+                list.classList.remove('list');
+            }
+        }
     }
     async getData() {
         const list = document.querySelector('.main__products-list');
@@ -92,8 +120,6 @@ export class MainController extends Controller {
         }
     }
     onSortClickHandler(select: Select, option: Option): void {
-        console.log(this);
-        
         select.changeSelection(option);
         const list = document.querySelector('.main__products-list');
 

@@ -3,7 +3,7 @@
     position: relative;
     font-size: 16px;
     line-height: 20px;
-    max-width: 182px;
+    max-width: 200px;
     &__selected {
         position: relative;
         padding-right: 30px;
@@ -14,13 +14,13 @@
         &::before {
             position: absolute;
             content: "";
-            width: 9px;
-            height: 5px;
+            width: 16px;
+            height: 16px;
             background-image: url('../img/arrow.svg');
             background-repeat: no-repeat;
             background-size: contain;
-            right: 15px;
-            top: 11px;
+            right: 10px;
+            top: 4px;
         }
     }
     &__list {
@@ -43,6 +43,9 @@
             left: -5px;
             top: 30px;
             z-index: 100;
+        }
+        .select__selected::before {
+            background-image: url('../img/chevron\ down.svg');
         }
     }
 }

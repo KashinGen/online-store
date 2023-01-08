@@ -38,8 +38,13 @@ export enum OrderSort {
     ASC,
 }
 
+export enum ProductViewMode {
+    TABLE = 'table',
+    LIST = 'list',
+}
+
 export interface Option {
     value: string;
-    order: OrderSort;
+    order?: OrderSort;
     label: string;
 }

@@ -50,7 +50,9 @@ class Select extends Component {
                         // dispatchEvent(c_event);
                     }
                     setTimeout(() => {
-                        target.closest('.select')?.classList.toggle('shown');
+                        console.log();
+                        
+                        target.closest('.select')?.classList.remove('shown');
                     }, 200);
                     return;
                 }

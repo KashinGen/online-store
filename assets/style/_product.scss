@@ -118,8 +118,30 @@
     }
 }
 
-@media screen and (min-width:500px) {
-    
+.main__products-list.list {
+    .product-card {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
+        &__img-wrapper {
+            width: 265px;
+            height: 265px;
+            max-height: 265px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        &__add-btn {
+            height: 40px;
+            width: fit-content;
+            border-radius: 8px;
+            align-self: flex-end;
+            padding: 0 12px;
+        }
+        &__content {
+            margin: 0 20px;
+        }
+    }
 }
 
 @media screen and (hover: hover) {
