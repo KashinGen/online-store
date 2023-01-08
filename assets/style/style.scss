@@ -25,6 +25,11 @@ body {
     flex:1;
 }
 .header {
+    position: sticky;
+    top:0;
+    height: 80px;
+    background-color: #fff;
+    z-index: 100;
     &__inner {
         display: flex;
         align-items: center;
