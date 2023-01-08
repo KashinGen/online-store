@@ -27,3 +27,19 @@ export interface ProductsResponse {
     skip: number;
     total: number;
 }
+
+export interface CartItem {
+    product: Product;
+    count: number;
+}
+
+export enum OrderSort {
+    DESC,
+    ASC,
+}
+
+export interface Option {
+    value: string;
+    order: OrderSort;
+    label: string;
+}

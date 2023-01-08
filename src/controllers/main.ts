@@ -1,11 +1,12 @@
 import { fetchProducts } from '../api';
 import Loader from '../components/Loader';
+import Select from '../components/Select';
 import InputSearch from '../components/InputSearch';
 import ProductItemComponent from '../components/ProductItemComponent';
 import { ProductItem } from '../models/Product';
-import { Controller, Product } from '../types';
+import { Controller, Product, CartItem } from '../types';
 import { debounce } from '../util';
-
+import { OrderSort, Option } from '../types/index';
 
 export class MainController extends Controller {
     products: Product[] = [];
@@ -13,10 +14,34 @@ export class MainController extends Controller {
     async init() {
         const searchWrapper = document.querySelector('.search');
         if (searchWrapper && searchWrapper instanceof HTMLElement) {
-            const search = new InputSearch({ 
+            const search = new InputSearch({
                 selector: searchWrapper,
                 template: '',
-            })
+            });
+            const selectWrapper = document.querySelector('.main__controls');
+            if (selectWrapper && selectWrapper instanceof HTMLElement) {
+                const optionsSort = [
+                    { value: 'alphabet', order: OrderSort.ASC, label: 'По алфавиту' },
+                    { value: 'price', order: OrderSort.ASC, label: 'По возрастанию цены' },
+                    { value: 'price', order: OrderSort.DESC, label: 'По убыванию цены' },
+                    { value: 'rating', order: OrderSort.ASC, label: 'По рейтингу' },
+                ];
+                const selected = optionsSort[0];
+                const select = new Select(
+                    selected,
+                    optionsSort,
+                    this.onSortClickHandler.bind(this),
+                    {
+                        selector: selectWrapper,
+                        template: '',
+                    }
+                );
+                select.render();
+                // document.querySelector('.main')?.addEventListener('selectionChanged', (evt) => {
+                //     console.log(evt);
+                    
+                // })
+            }
             const list = document.querySelector('.main__products-list');
             search.render();
             document.querySelector('.input-search__input')?.addEventListener('input', debounce(async (e) => {
@@ -32,19 +57,19 @@ export class MainController extends Controller {
                             product.price.toString().includes(value) ||
                             product.stock.toString().includes(value)
                         })                    
-                        setTimeout(() => {
-                            this.renderProducts(list);
-                        }, 100)
-                    }                    
-                }
-            }, 250))
+                            setTimeout(() => {
+                                this.renderProducts(list);
+                            }, 100);
+                        }
+                }}, 250)
+            );
         }
         await this.getData();
     }
     async getData() {
         const list = document.querySelector('.main__products-list');
         if (list && list instanceof HTMLElement) {
-            this.setLoading(list)
+            this.setLoading(list);
             const data = await fetchProducts();
             if (data.products && data.products.length > 0) {
                 this.products = data.products;
@@ -61,18 +86,50 @@ export class MainController extends Controller {
                 selector: loaderWrapper,
                 template: '',
             });
-            root.innerHTML = ''
+            root.innerHTML = '';
             root.append(loaderWrapper);
             loader.render();
         }
     }
+    onSortClickHandler(select: Select, option: Option): void {
+        console.log(this);
+        
+        select.changeSelection(option);
+        const list = document.querySelector('.main__products-list');
+
+        if (list && list instanceof HTMLElement) {
+            this.setLoading(list);            
+            switch(option.value) {
+                case 'price': {
+                    this.filteredProducts = this.filteredProducts.sort((a, b) => a.price - b.price);
+                    break;
+                }
+                case 'rating': {
+                    this.filteredProducts = this.filteredProducts.sort((a, b) => a.rating - b.rating);
+                    break;
+                }
+                default: {
+                    this.filteredProducts = this.filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                }
+            }
+            setTimeout(() => {
+                this.renderProducts(list);
+            }, 100);
+        }
+    }
+
     async renderProducts(root: HTMLElement) {
         const fragment = new DocumentFragment();
+        const cartJSON = localStorage.getItem('cart');
+        const cart = cartJSON ? JSON.parse(cartJSON) : [];
         this.filteredProducts.forEach((product) => {
             const productModel = new ProductItem(product);
             const card = document.createElement('div');
             card.classList.add('product-card');
-            const productComponent = new ProductItemComponent(productModel, {
+            const index = cart.findIndex((item: CartItem) => item.product.id === product.id);
+            const isInCart = index !== -1;
+            const productComponent = new ProductItemComponent(product, {
                 selector: card,
                 template: `<a href="/detail/${product.id}" target='_blank' class="router-link">
                     <div class='product-card__img-wrapper'>
@@ -112,13 +169,56 @@ export class MainController extends Controller {
                     <div style='flex: 1 1 0%'></div>
                 </div>
                 <button class='product-card__add-btn'>
-                    <span>В корзину</span>
+                    <span class='product-card__add-btn-text'>${isInCart ? 'В корзине' : 'В корзину'}</span>
                     <span class='product-card__add-btn-icon'></span>
                 </button>
                 `,
             });
             fragment.append(card);
             productComponent.render();
+            card.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target && target instanceof HTMLElement) {
+                    const btn = target.closest('.product-card__add-btn');
+                    if (btn) {
+                        if (index !== -1) {
+                            if (cart[index].product.stock > cart[index].count + 1) {
+                                cart[index].count++;
+                            }
+                        } else {
+                            cart.push({
+                                product: product,
+                                count: 1,
+                            });
+                            const btnText = btn.querySelector('.product-card__add-btn-text');
+                            if (btnText) {
+                                btnText.innerHTML = 'В корзине';
+                            }
+                        }
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        const cart_sum = document.querySelector('.header__cart-info-count span');
+                        const { sum, count } = cart.reduce(
+                            (acc: { count: number; sum: number }, cartItem: CartItem) => {
+                                acc.sum += cartItem.product.price * cartItem.count;
+                                acc.count += cartItem.count;
+                                return acc;
+                            },
+                            { count: 0, sum: 0 }
+                        );
+
+                        if (cart_sum) {
+                            cart_sum.innerHTML = sum;
+                        }
+                        const cart_icon = document.querySelector('.header__cart-link');
+                        if (cart_icon) {
+                            cart_icon.setAttribute('data-count', count);
+                            if (count > 0) {
+                                cart_icon.classList.add('on');
+                            }
+                        }
+                    }
+                }
+            });
         });
         root.innerHTML = '';
         root.append(fragment);

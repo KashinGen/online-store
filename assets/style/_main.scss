@@ -16,6 +16,9 @@
         gap: 10px;
 
     }
+    &__controls {
+        margin-bottom: 20px;
+    }
 }
 .input-search {
     width: 100%;
@@ -23,7 +26,8 @@
     border: 1px solid #cfcfcf;
     border-radius: 6px;
     margin-bottom: 30px;
-    &__input {
+    &__input,
+    &__input:focus-visible {
         background-color: #fff;
         width: 100%;
         font-size: 15px;
@@ -31,6 +35,7 @@
         border-radius: 6px;
         padding: 11px 80px 11px 11px;
         border: none;
+        outline: none;
     }
     &__btn {
         width: 42px;

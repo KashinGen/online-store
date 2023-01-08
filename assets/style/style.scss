@@ -4,6 +4,7 @@
 @import '_main.scss';
 @import '_cart.scss';
 @import '_404.scss';
+@import '_controls.scss';
 
 .container {
     width: 100%;
@@ -56,6 +57,28 @@ body {
             display:flex;
             font-size: 20px;
             line-height: 125%;
+        }
+        &-link {
+            position: relative;
+            &::before {
+                position: absolute;
+                content: attr(data-count);
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+                line-height: 25px;
+                top: -13px;
+                right: -13px;
+                font-weight: 600;
+                color: #fff;
+                background-color: $hover-color;
+                text-align: center;
+                border-radius: 50%;
+                opacity: 0;
+            }
+            &.on::before {
+                opacity: 1;
+            }
         }
     }
 }
