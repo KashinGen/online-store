@@ -48,3 +48,9 @@ export interface Option {
     order?: OrderSort;
     label: string;
 }
+
+export interface CheckboxProps {
+    value: string;
+    name: string;
+    label: string;
+}

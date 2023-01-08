@@ -57,3 +57,80 @@
         background-color: $hover-color;
     }
 }
+
+.filter {
+    &__title {
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 100%;
+        margin-bottom: 20px;
+    }
+    &-item + &-item {
+        margin-top: 12px;
+    }
+    &-item {
+        &__list {
+            position: relative;
+            height: 266px;
+            max-height: 266px;
+            overflow-y: auto;
+            &::-webkit-scrollbar {
+                width: 4px;
+            }
+            &::-webkit-scrollbar-track {
+                background-color: #C4C4C4;
+                border-radius: 2px;
+                background-clip: content-box;
+
+            }
+            &::-webkit-scrollbar-thumb {
+                background-color: $main;
+                border-radius: 2px;
+                height: 40px !important;
+
+            }
+        }
+        &__title {
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 100%;
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.checkbox {
+    display: block;
+    position: relative;
+    padding: 6px 0 6px 30px;
+    height: 32px;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+    .checkmark {
+        position: absolute;
+        top: 6px;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        background-image: url('../img/checkbox_field.svg');
+    }
+    input:checked ~ .checkmark {
+        background-image: url('../img/checkbox_active.svg')
+    }
+}
+
+@media screen and (hover: hover) {
+    .checkbox:hover .checkmark {
+        background-image: url('../img/checkbox_hover.svg')
+    }
+}

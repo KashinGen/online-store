@@ -3,10 +3,10 @@ import Loader from '../components/Loader';
 import Select from '../components/Select';
 import InputSearch from '../components/InputSearch';
 import ProductItemComponent from '../components/ProductItemComponent';
-import { ProductItem } from '../models/Product';
 import { Controller, Product, CartItem, ProductViewMode } from '../types';
 import { debounce } from '../util';
 import { OrderSort, Option } from '../types/index';
+import Checkbox from '../components/Checkbox';
 
 export class MainController extends Controller {
     products: Product[] = [];
@@ -82,6 +82,71 @@ export class MainController extends Controller {
             );
         }
         await this.getData();
+        await this.getFilter();
+    }
+    async getFilter() {
+        const brands: { [key: string]: boolean } = {};
+        const categories: { [key: string]: boolean } = {};
+        let min = 1000000;
+        let max = 0;
+        let minStock = 1000000;
+        let maxStock = 0;
+        this.products.forEach((item) => {
+            if (!brands[item.brand]) {
+                brands[item.brand] = true;
+            }
+            if (!categories[item.category]) {
+                categories[item.category] = true;
+            }
+            min = item.price > min ? min : item.price;
+            max = item.price < max ? max : item.price;
+            minStock = item.stock < minStock ? item.stock : minStock;
+            maxStock = item.stock > maxStock ? item.stock : maxStock;
+        });
+        this.renderFilter(brands, categories, min, max, minStock, maxStock)
+    }
+    renderFilter(brands: { [key: string]: boolean },
+                 categories: { [key: string]: boolean },
+                 min: number, 
+                 max: number, 
+                 minStock: number, 
+                 maxStock: number) {
+        const brandsFilterBlock = document.querySelector('.filter-item.brands');
+        if (brandsFilterBlock) {
+            this.renderFilterList(brands, brandsFilterBlock, 'brands')            
+        }    
+        const categoriesFilterBlock = document.querySelector('.filter-item.categories');
+        if (categoriesFilterBlock) {
+            this.renderFilterList(categories, categoriesFilterBlock, 'categories');        
+        }
+        const checkboxes = document.querySelectorAll('.filter-item input[type=checkbox]');          
+        checkboxes.forEach((element: Element) => {
+            element.addEventListener('change', (e) => {
+                console.log(e);
+                
+            })
+        });
+    }
+    renderFilterList(arr: { [key: string]: boolean }, root: Element, type: string) {
+        const list = root.querySelector('.filter-item__list');
+        if (list) {
+            const fragment = new DocumentFragment();
+            Object.keys(arr).forEach((brand) => {
+                const li = document.createElement('li');
+                const checkboxItem = new Checkbox({
+                    value: brand,
+                    name:type,
+                    label: brand
+                }, {
+                    selector: li,
+                    template: ''
+                });
+                fragment.append(li);
+                checkboxItem.render();
+            })
+            list.innerHTML = '';
+            list.append(fragment);
+        }
     }
     onChangeViewHandler(select: Select, option: Option): void {
         select.changeSelection(option);
@@ -150,7 +215,6 @@ export class MainController extends Controller {
         const cartJSON = localStorage.getItem('cart');
         const cart = cartJSON ? JSON.parse(cartJSON) : [];
         this.filteredProducts.forEach((product) => {
-            const productModel = new ProductItem(product);
             const card = document.createElement('div');
             card.classList.add('product-card');
             const index = cart.findIndex((item: CartItem) => item.product.id === product.id);
