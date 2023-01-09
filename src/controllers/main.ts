@@ -12,45 +12,94 @@ import RangeSlider from '../components/RangeSlider';
 export class MainController extends Controller {
     products: Product[] = [];
     filteredProducts: Product[] = [];
+    optionsSort:Option[] = [
+        { value: 'alphabet', order: OrderSort.ASC, label: 'По алфавиту' },
+        { value: 'price', order: OrderSort.ASC, label: 'По возрастанию цены' },
+        { value: 'price', order: OrderSort.DESC, label: 'По убыванию цены' },
+        { value: 'rating', order: OrderSort.ASC, label: 'По рейтингу' },
+    ];
+    selected:Option = this.optionsSort[0];
+    optionsView: Option[]= [
+        { value: ProductViewMode.TABLE, label: 'Таблицей' },
+        { value: ProductViewMode.LIST, label: 'Списком' },
+    ];
+    selectSort: Select | null = null;
+    selectedView:Option = this.optionsView[0];
+    search = ''
+    setURLParams(param: string, value: string): void {
+        const url = new URL(window.location.href);
+        if (value.length !== 0) {
+            url.searchParams.set(param, value);
+        } else {
+            url.searchParams.delete(param)
+        }
+        history.pushState(null, '', url);
+    }
+    getURLParams(): void {
+        const searchParams = new URLSearchParams(window.location.search);
+        const search = searchParams.get('q');
+        const view = searchParams.get('view');
+        const sort = searchParams.get('sort');
+        const order = searchParams.get('order');
+        if (view) {
+            const selectedView = this.optionsView.find((item) => item.value === view);
+            this.selectedView = selectedView ? selectedView : this.selectedView;
+        }
+        if (search) {
+            this.search = search.toLowerCase();
+        }
+        if (sort && order) {
+            const selectedSort = this.optionsSort.find((item) => item.value === sort && item.order?.toString() === order);
+            this.selected = selectedSort ? selectedSort : this.selected;
+        }        
+    }
+    async onSearchInputHandler(value: string) {
+        const list = document.querySelector('.main__products-list');
+        if (list && list instanceof HTMLElement) {
+            this.setLoading(list);
+            this.setURLParams('q', value);
+            this.filteredProducts = this.products.filter(product => {
+                return product.title.toLowerCase().includes(value) ||
+                product.brand.toLowerCase().includes(value) ||
+                product.description.toLowerCase().includes(value) ||
+                product.price.toString().includes(value) ||
+                product.stock.toString().includes(value)
+            })
+            this.getFoundCount();                   
+            setTimeout(() => {
+                this.renderProducts(list);
+            }, 100);
+        }
+    }
     async init() {
         const searchWrapper = document.querySelector('.search');
+        this.getURLParams();
         if (searchWrapper && searchWrapper instanceof HTMLElement) {
             const search = new InputSearch({
                 selector: searchWrapper,
                 template: '',
             });
             const selectSortWrapper = document.querySelector('.main__select-sort');
-
             if (selectSortWrapper && selectSortWrapper instanceof HTMLElement) {
-                const optionsSort = [
-                    { value: 'alphabet', order: OrderSort.ASC, label: 'По алфавиту' },
-                    { value: 'price', order: OrderSort.ASC, label: 'По возрастанию цены' },
-                    { value: 'price', order: OrderSort.DESC, label: 'По убыванию цены' },
-                    { value: 'rating', order: OrderSort.ASC, label: 'По рейтингу' },
-                ];
-                let selected = optionsSort[0];
-                const selectSort = new Select(
-                    selected,
-                    optionsSort,
+
+                this.selectSort = new Select(
+                    this.selected,
+                    this.optionsSort,
                     this.onSortClickHandler.bind(this),
                     {
                         selector: selectSortWrapper,
                         template: '',
                     }
                 );
-                selectSort.render();
+                this.selectSort.render();
                 }
                 const selectViewWrapper = document.querySelector('.main__select-view');
 
                 if (selectViewWrapper && selectViewWrapper instanceof HTMLElement) {
-                const optionsView: Option[]= [
-                    { value: ProductViewMode.TABLE, label: 'Таблицей' },
-                    { value: ProductViewMode.LIST, label: 'Списком' },
-                ];
-                const selectedView = optionsView[0];
+
                 const selectView = new Select(
-                    selectedView,
-                    optionsView,
+                    this.selectedView,
+                    this.optionsView,
                     this.onChangeViewHandler.bind(this),
                     {
                         selector: selectViewWrapper,
@@ -58,33 +107,37 @@ export class MainController extends Controller {
                     }
                 );
                 selectView.render();
+                if (this.selectedView !== this.optionsView[0]) {
+                    this.onChangeViewHandler(selectView, this.selectedView);
+                }
                 }
             
-            const list = document.querySelector('.main__products-list');
             search.render();
-            document.querySelector('.input-search__input')?.addEventListener('input', debounce(async (e) => {
+            const searchInput = document.querySelector('.input-search__input');
+            if (this.search && searchInput instanceof HTMLInputElement) {
+                console.log(this.search);
+                searchInput.value = this.search;
+            }
+            searchInput?.addEventListener('input', debounce(async (e) => {
                 const target = e.target;
                 if (target instanceof HTMLInputElement) {
                     const value = target.value.toLowerCase();
-                    if (list && list instanceof HTMLElement) {
-                        this.setLoading(list);
-                        this.filteredProducts = this.products.filter(product => {
-                            return product.title.toLowerCase().includes(value) ||
-                            product.brand.toLowerCase().includes(value) ||
-                            product.description.toLowerCase().includes(value) ||
-                            product.price.toString().includes(value) ||
-                            product.stock.toString().includes(value)
-                        })
-                        this.getFoundCount();                   
-                        setTimeout(() => {
-                            this.renderProducts(list);
-                        }, 100);
-                        }
+                    this.onSearchInputHandler(value);
                 }}, 250)
             );
         }
-        await this.getData();
-        await this.getFilter();
+        const list = document.querySelector('.main__products-list');
+        if (list && list instanceof HTMLElement) {
+            await this.getData(list);
+            await this.getFilter();
+            if (this.selectSort) {
+                this.onSortClickHandler(this.selectSort, this.selected)
+            }
+            await this.renderProducts(list);
+        }
+        if (this.search) {
+            this.onSearchInputHandler(this.search);
+        }
     }
     onPriceRangeHandler() {
 
@@ -178,29 +231,28 @@ export class MainController extends Controller {
             list.append(fragment);
         }
     }
+
     onChangeViewHandler(select: Select, option: Option): void {
         select.changeSelection(option);
         const list = document.querySelector('.main__products-list');
         if (list && list instanceof HTMLElement) {
             if (option.value === ProductViewMode.LIST) {
                 list.classList.add('list');
+                this.setURLParams('view', option.value)
             } else {
                 list.classList.remove('list');
+                this.setURLParams('view', '')
             }
         }
     }
-    async getData() {
-        const list = document.querySelector('.main__products-list');
-        if (list && list instanceof HTMLElement) {
+    async getData(list: HTMLElement){
             this.setLoading(list);
             const data = await fetchProducts();
             if (data.products && data.products.length > 0) {
                 this.products = data.products;
                 this.filteredProducts = data.products;
                 this.getFoundCount();
-                this.renderProducts(list);
             }
-        }
     }
     setLoading(root: HTMLElement) {
         if (root) {
@@ -217,17 +269,27 @@ export class MainController extends Controller {
     }
     onSortClickHandler(select: Select, option: Option): void {
         select.changeSelection(option);
+        console.log(option, this.selected);
+        
+        if (JSON.stringify(option) !== JSON.stringify(this.selected)) {
+            this.setURLParams('sort', option.value);
+            this.setURLParams('order', option.order!== undefined ? option.order.toString() : '');
+        }
         const list = document.querySelector('.main__products-list');
 
         if (list && list instanceof HTMLElement) {
             this.setLoading(list);            
             switch(option.value) {
                 case 'price': {
-                    this.filteredProducts = this.filteredProducts.sort((a, b) => a.price - b.price);
+                    if (option.order === OrderSort.ASC) {
+                        this.filteredProducts = this.filteredProducts.sort((a, b) => a.price - b.price);
+                    } else {
+                        this.filteredProducts = this.filteredProducts.sort((a, b) => b.price - a.price);
+                    }
                     break;
                 }
                 case 'rating': {
-                    this.filteredProducts = this.filteredProducts.sort((a, b) => a.rating - b.rating);
+                    this.filteredProducts = this.filteredProducts.sort((a, b) => b.rating - a.rating);
                     break;
                 }
                 default: {
