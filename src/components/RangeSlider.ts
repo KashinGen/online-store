@@ -5,6 +5,7 @@ class RangeSlider extends Component {
     minmax: [number, number];
     minmaxvalue: [number, number];
     eventsInited: boolean = false;
+    callback: Function;
     constructor(minmax:[number, number],
                 minmaxvalue: [number, number],
                 callback: Function,
@@ -12,8 +13,11 @@ class RangeSlider extends Component {
         super(config);
         this.minmaxvalue = minmaxvalue;
         this.minmax = minmax;
+        this.callback = callback;
     }
+    onMinChange() {
 
+    }
     render() {
         this.template = `
         <div class="range">
@@ -50,16 +54,49 @@ class RangeSlider extends Component {
         let sliderMaxValue = 100;
         if (sliderMax && sliderMax instanceof HTMLInputElement) {
             sliderMaxValue = +sliderMax.max;
-        }
+        }        
         if (sliderOne && sliderOne instanceof HTMLInputElement) {
-            sliderOne.addEventListener("input", slideOne)
+            sliderOne.addEventListener("input", slideOne);
+            sliderOne.addEventListener("change", (e) => {
+                const target = e.target;
+                if (target && target instanceof HTMLInputElement) {
+                    if (sliderTwo && sliderTwo instanceof HTMLInputElement) {
+                        this.callback([+target.value, +sliderTwo.value])
+                    }
+                }
+            });
+            sliderOne.addEventListener("blur", (e) => {
+                const target = e.target;
+                if (target && target instanceof HTMLInputElement) {
+                    if (sliderTwo && sliderTwo instanceof HTMLInputElement) {
+                        this.callback([+target.value, +sliderTwo.value])
+                    }
+                }
+            });
         }
         if (sliderTwo && sliderTwo instanceof HTMLInputElement) {
-            sliderTwo.addEventListener("input", slideTwo)
+            sliderTwo.addEventListener("input", slideTwo);
+            sliderTwo.addEventListener("change", (e) => {
+                const target = e.target;
+                if (target && target instanceof HTMLInputElement) {
+                    if (sliderOne && sliderOne instanceof HTMLInputElement) {
+                        this.callback([+sliderOne.value, +target.value])
+                    }
+                }
+            });
+            sliderTwo.addEventListener("blur", (e) => {
+                const target = e.target;
+                if (target && target instanceof HTMLInputElement) {
+                    if (sliderOne && sliderOne instanceof HTMLInputElement) {
+                        this.callback([+sliderOne.value, +target.value])
+                    }
+                }
+            });
         }
+
         slideOne();
         slideTwo();
-        function slideOne(){            
+        function slideOne() {            
             if (sliderOne && sliderTwo && sliderOne instanceof HTMLInputElement && sliderTwo instanceof HTMLInputElement) {                
                 if(parseInt(sliderTwo.value) - parseInt(sliderOne.value) <= minGap){
                     sliderOne.value = (parseInt(sliderTwo.value) - minGap).toString();
@@ -70,16 +107,15 @@ class RangeSlider extends Component {
                 fillColor();
             }
         }
-        function slideTwo(){
+        function slideTwo() {
             if (sliderOne && sliderTwo && sliderOne instanceof HTMLInputElement && sliderTwo instanceof HTMLInputElement) {
                 if(parseInt(sliderTwo.value) - parseInt(sliderOne.value) <= minGap){
                     sliderTwo.value = (parseInt(sliderOne.value) + minGap).toString();
-                }
+                }                
                 if (displayValTwo) {
                     displayValTwo.textContent = sliderTwo.value;
                 }
                 fillColor();
-
             }
         }
         function fillColor() {
@@ -92,6 +128,7 @@ class RangeSlider extends Component {
                 }
             }
         }
+
     }
 }
 export default RangeSlider;

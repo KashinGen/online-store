@@ -53,4 +53,18 @@ export interface CheckboxProps {
     value: string;
     name: string;
     label: string;
+    checked: boolean;
+    disabled: boolean;
 }
+export enum FilterCheckboxType {
+    BRAND = 'brands',
+    CATEGORY = 'categories',
+}
+
+export interface Filter {
+    brands: string[];
+    categories: string[];
+    price: [number, number];
+    stock: [number, number];
+}
+

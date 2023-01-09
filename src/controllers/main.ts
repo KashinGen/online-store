@@ -3,7 +3,7 @@ import Loader from '../components/Loader';
 import Select from '../components/Select';
 import InputSearch from '../components/InputSearch';
 import ProductItemComponent from '../components/ProductItemComponent';
-import { Controller, Product, CartItem, ProductViewMode } from '../types';
+import { Controller, Product, CartItem, ProductViewMode, Filter, FilterCheckboxType } from '../types';
 import { debounce } from '../util';
 import { OrderSort, Option } from '../types/index';
 import Checkbox from '../components/Checkbox';
@@ -25,7 +25,19 @@ export class MainController extends Controller {
     ];
     selectSort: Select | null = null;
     selectedView:Option = this.optionsView[0];
-    search = ''
+    search = '';
+    filter: Filter = {
+        brands: [],
+        categories: [],
+        price: [0, 0],
+        stock: [0, 0],
+    }
+    filterData: Filter = {
+        brands: [],
+        categories: [],
+        price: [0, 0],
+        stock: [0, 0],
+    }
     setURLParams(param: string, value: string): void {
         const url = new URL(window.location.href);
         if (value.length !== 0) {
@@ -54,22 +66,9 @@ export class MainController extends Controller {
         }        
     }
     async onSearchInputHandler(value: string) {
-        const list = document.querySelector('.main__products-list');
-        if (list && list instanceof HTMLElement) {
-            this.setLoading(list);
-            this.setURLParams('q', value);
-            this.filteredProducts = this.products.filter(product => {
-                return product.title.toLowerCase().includes(value) ||
-                product.brand.toLowerCase().includes(value) ||
-                product.description.toLowerCase().includes(value) ||
-                product.price.toString().includes(value) ||
-                product.stock.toString().includes(value)
-            })
-            this.getFoundCount();                   
-            setTimeout(() => {
-                this.renderProducts(list);
-            }, 100);
-        }
+        this.setURLParams('q', value);
+        this.search = value;
+        this.filterProducts();
     }
     async init() {
         const searchWrapper = document.querySelector('.search');
@@ -115,7 +114,6 @@ export class MainController extends Controller {
             search.render();
             const searchInput = document.querySelector('.input-search__input');
             if (this.search && searchInput instanceof HTMLInputElement) {
-                console.log(this.search);
                 searchInput.value = this.search;
             }
             searchInput?.addEventListener('input', debounce(async (e) => {
@@ -139,19 +137,75 @@ export class MainController extends Controller {
             this.onSearchInputHandler(this.search);
         }
     }
-    onPriceRangeHandler() {
+    onPriceRangeHandler(value: [number, number]) {
+        if (JSON.stringify(this.filter.price) !== JSON.stringify(value)) {
+            this.filter.price = value;
+            setTimeout(() => {
+                this.filterProducts()
+            })
+        }  
+    }
+
+    onStockRangeHandler(value: [number, number]) {
+        if (JSON.stringify(this.filter.stock) !== JSON.stringify(value)) {
+            this.filter.stock = value;
+            setTimeout(() => {
+                this.filterProducts()
+            })
+        }
+    }
+    filterProducts() {
+        const list = document.querySelector('.main__products-list');
+        if (list && list instanceof HTMLElement) {
+            this.setLoading(list);
+            let products = this.products;
+            if (this.filter.brands.length !== 0) {
+                products = products.filter((item) => {
+                    return this.filter.brands.includes(item.brand)
+                })
+            }
+            if (this.filter.categories.length !== 0) {
+                products = products.filter((item) => {                    
+                    return this.filter.categories.includes(item.category)
+                })
+            }
+            if (JSON.stringify(this.filter.price) !== JSON.stringify(this.filterData.price)) {
+                products = products.filter((item) => {                    
+                    return item.price >= this.filter.price[0] && item.price <= this.filter.price[1]
+                })
+            }
+            if (JSON.stringify(this.filter.stock) !== JSON.stringify(this.filterData.stock)) {
+                products = products.filter((item) => {                    
+                    return item.stock >= this.filter.stock[0] && item.price <= this.filter.stock[1]
+                })
+            }
+            if (this.search.length !== 0) {
+                const value = this.search.toLowerCase();
+                products = products.filter(product => {
+                    return product.title.toLowerCase().includes(value) ||
+                    product.brand.toLowerCase().includes(value) ||
+                    product.description.toLowerCase().includes(value) ||
+                    product.price.toString().includes(value) ||
+                    product.stock.toString().includes(value)
+                })
+            }
+            this.filteredProducts = products;
+            this.renderFilter();  
+            this.getFoundCount();                       
+            setTimeout(() => {
+                this.renderProducts(list)
+            },100)
+        }
 
     }
-    onStockRangeHandler() {
 
-    }
     getFoundCount() {
         const countContainer = document.querySelector('.main__products-found span');
         if (countContainer) {
             countContainer.innerHTML = this.filteredProducts.length.toString();
         }
     }
-    async getFilter() {
+    getFilter() {
         const brands: { [key: string]: boolean } = {};
         const categories: { [key: string]: boolean } = {};
         let min = 1000000;
@@ -169,26 +223,28 @@ export class MainController extends Controller {
             max = item.price < max ? max : item.price;
             minStock = item.stock < minStock ? item.stock : minStock;
             maxStock = item.stock > maxStock ? item.stock : maxStock;
+            this.filterData.brands = Object.keys(brands);
+            this.filterData.categories = Object.keys(categories);
+            this.filterData.price = [min, max];
+            this.filterData.stock = [minStock, maxStock];
+            this.filter.price = [min, max];
+            this.filter.stock = [minStock, maxStock];
         });
-        this.renderFilter(brands, categories, min, max, minStock, maxStock)
+        this.renderFilter();
     }
-    renderFilter(brands: { [key: string]: boolean },
-                 categories: { [key: string]: boolean },
-                 min: number, 
-                 max: number, 
-                 minStock: number, 
-                 maxStock: number) {
+    renderFilter() {
         const brandsFilterBlock = document.querySelector('.filter-item.brands');
         if (brandsFilterBlock) {
-            this.renderFilterList(brands, brandsFilterBlock, 'brands')            
+            this.renderFilterList(this.filterData.brands, brandsFilterBlock, FilterCheckboxType.BRAND)            
         }    
         const categoriesFilterBlock = document.querySelector('.filter-item.categories');
         if (categoriesFilterBlock) {
-            this.renderFilterList(categories, categoriesFilterBlock, 'categories');        
+            this.renderFilterList(this.filterData.categories, categoriesFilterBlock, FilterCheckboxType.CATEGORY);        
         }
         const priceFilterBlock = document.querySelector('.filter-item.price .filter-item__content');
         if (priceFilterBlock && priceFilterBlock instanceof HTMLElement) {
-            const slider = new RangeSlider([min,max], [min,max], this.onPriceRangeHandler, {
+            const slider = new RangeSlider([this.filterData.price[0],this.filterData.price[1]],
+                        [this.filter.price[0], this.filter.price[1]], this.onPriceRangeHandler.bind(this), {
                 selector: priceFilterBlock,
                 template:''
             });
@@ -196,7 +252,8 @@ export class MainController extends Controller {
         }
         const stockFilterBlock = document.querySelector('.filter-item.stock .filter-item__content');
         if (stockFilterBlock && stockFilterBlock instanceof HTMLElement) {
-            const slider = new RangeSlider([minStock,maxStock], [minStock,maxStock], this.onStockRangeHandler, {
+            const slider = new RangeSlider([this.filterData.stock[0],this.filterData.stock[1]],
+                        [this.filter.stock[0], this.filter.stock[1]], this.onStockRangeHandler.bind(this), {
                 selector: stockFilterBlock,
                 template:''
             });
@@ -205,21 +262,48 @@ export class MainController extends Controller {
         const checkboxes = document.querySelectorAll('.filter-item input[type=checkbox]');          
         checkboxes.forEach((element: Element) => {
             element.addEventListener('change', (e) => {
-                console.log(e);
-                
+                const target = e.target;
+                if (target && target instanceof HTMLInputElement) {
+                    const type = target.name;
+                    const value = target.value;
+                    const checked = target.checked;                    
+                    if (type === FilterCheckboxType.BRAND || type === FilterCheckboxType.CATEGORY) {
+                        if (!checked) {
+                            const index = this.filter[type].findIndex((item) => item === value);
+                            if (index !== -1) {
+                                this.filter[type] = [...this.filter[type].slice(0, index),...this.filter[type].slice(index + 1)];
+                            } else {
+                                this.filter[type].push(value);
+                            }
+                        } else {
+                            this.filter[type].push(value);
+                        }
+                    }
+                    this.filterProducts();
+                }             
             })
         });
     }
-    renderFilterList(arr: { [key: string]: boolean }, root: Element, type: string) {
+    renderFilterList(arr: string[], root: Element, type: FilterCheckboxType) {
         const list = root.querySelector('.filter-item__list');
         if (list) {
+            list.innerHTML = ''
             const fragment = new DocumentFragment();
-            Object.keys(arr).forEach((brand) => {
-                const li = document.createElement('li');
+            arr.forEach((item) => {
+                const li = document.createElement('li');                
                 const checkboxItem = new Checkbox({
-                    value: brand,
-                    name:type,
-                    label: brand
+                    value: item,
+                    name:type.toString(),
+                    label: item,
+                    checked: this.filter[type].includes(item),
+                    disabled: this.filteredProducts.findIndex((pr) => {
+                        if (type === FilterCheckboxType.BRAND) {
+                            return pr.brand === item
+                        }
+                        if (type === FilterCheckboxType.CATEGORY) {
+                            return pr.category === item
+                        }
+                    }) === -1
                 }, {
                     selector: li,
                     template: ''
@@ -268,9 +352,7 @@ export class MainController extends Controller {
         }
     }
     onSortClickHandler(select: Select, option: Option): void {
-        select.changeSelection(option);
-        console.log(option, this.selected);
-        
+        select.changeSelection(option);        
         if (JSON.stringify(option) !== JSON.stringify(this.selected)) {
             this.setURLParams('sort', option.value);
             this.setURLParams('order', option.order!== undefined ? option.order.toString() : '');

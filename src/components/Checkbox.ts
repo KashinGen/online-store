@@ -10,8 +10,13 @@ class Checkbox extends Component {
 
     render() {
         this.template = `
-            <label class="checkbox">
-                <input type="checkbox" value="${this.props.value}" name="${this.props.name}" />
+            <label class="checkbox ${this.props.disabled ? 'disabled' : ''}">
+                <input  type="checkbox" 
+                        value="${this.props.value}" 
+                        name="${this.props.name}" 
+                        ${this.props.checked ? 'checked' : ''}
+                        ${this.props.disabled ? 'disabled' : ''}
+                        />
                 <span class="checkmark"></span>${this.props.label}
             </label>`;
         super.render();
