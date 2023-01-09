@@ -7,6 +7,7 @@ import { Controller, Product, CartItem, ProductViewMode } from '../types';
 import { debounce } from '../util';
 import { OrderSort, Option } from '../types/index';
 import Checkbox from '../components/Checkbox';
+import RangeSlider from '../components/RangeSlider';
 
 export class MainController extends Controller {
     products: Product[] = [];
@@ -84,6 +85,12 @@ export class MainController extends Controller {
         await this.getData();
         await this.getFilter();
     }
+    onPriceRangeHandler() {
+
+    }
+    onStockRangeHandler() {
+
+    }
     async getFilter() {
         const brands: { [key: string]: boolean } = {};
         const categories: { [key: string]: boolean } = {};
@@ -118,6 +125,22 @@ export class MainController extends Controller {
         const categoriesFilterBlock = document.querySelector('.filter-item.categories');
         if (categoriesFilterBlock) {
             this.renderFilterList(categories, categoriesFilterBlock, 'categories');        
+        }
+        const priceFilterBlock = document.querySelector('.filter-item.price .filter-item__content');
+        if (priceFilterBlock && priceFilterBlock instanceof HTMLElement) {
+            const slider = new RangeSlider([min,max], [min,max], this.onPriceRangeHandler, {
+                selector: priceFilterBlock,
+                template:''
+            });
+            slider.render();
+        }
+        const stockFilterBlock = document.querySelector('.filter-item.stock .filter-item__content');
+        if (stockFilterBlock && stockFilterBlock instanceof HTMLElement) {
+            const slider = new RangeSlider([minStock,maxStock], [minStock,maxStock], this.onStockRangeHandler, {
+                selector: stockFilterBlock,
+                template:''
+            });
+            slider.render();
         }
         const checkboxes = document.querySelectorAll('.filter-item input[type=checkbox]');          
         checkboxes.forEach((element: Element) => {

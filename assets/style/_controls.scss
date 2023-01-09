@@ -68,6 +68,9 @@
     &-item + &-item {
         margin-top: 12px;
     }
+    &-item.price + &-item {
+        margin-top: 40px;
+    }
     &-item {
         &__list {
             position: relative;
@@ -128,6 +131,100 @@
         background-image: url('../img/checkbox_active.svg')
     }
 }
+
+
+.range {
+    position: relative;
+    width: 100%;
+    background-color: #ffffff;
+    //padding: 50px 40px 20px 40px;
+    //border-radius: 10px;
+    &__wrapper{
+        position: relative;
+        width: 100%;
+        margin-top: 20px;
+    }
+    input[type="range"]{
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 100%;
+        outline: none;
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        background-color: transparent;
+        pointer-events: none;
+    }
+    &__track{
+        width: 100%;
+        height: 4px;
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        border-radius: 6px;
+    }
+    input[type="range"]::-webkit-slider-runnable-track{
+        -webkit-appearance: none;
+        height: 4px;
+    }
+    input[type="range"]::-moz-range-track{
+        -moz-appearance: none;
+        height: 4px;
+    }
+    input[type="range"]::-ms-track{
+        appearance: none;
+        height: 4px;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+        -webkit-appearance: none;
+        width: 19px;
+        height: 19px;
+        border: 2px solid #bcbcbc;
+        cursor: pointer;
+        margin-top: -7px;
+        pointer-events: auto;
+        border-radius: 50%;
+        background-color: #fff;
+    }
+    input[type="range"]::-moz-range-thumb{
+        -webkit-appearance: none;
+        appearance: none;
+        width: 19px;
+        height: 19px;
+        border: 2px solid #bcbcbc;
+        cursor: pointer;
+        border-radius: 50%;
+        pointer-events: auto;
+        background-color: #fff;
+
+    }
+    input[type="range"]::-ms-thumb{
+        appearance: none;
+        width: 19px;
+        height: 19px;
+        border: 2px solid #bcbcbc;
+        cursor: pointer;
+        border-radius: 50%;
+        pointer-events: auto;
+        background-color: #fff;
+
+    }
+    input[type="range"]:active::-webkit-slider-thumb{
+        background-color: #ffffff;
+        border: 3px solid $main;
+    }
+    &__values{
+        display: flex;
+        align-items: center;
+        justify-content:space-between;
+    }
+
+}
+
+
 
 @media screen and (hover: hover) {
     .checkbox:hover .checkmark {
