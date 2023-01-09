@@ -26,9 +26,42 @@ export class DetailController extends Controller {
                 root.append(divNotFound);
             } else {
                 this.product = data;
+                root.innerHTML = ''
+                this.renderBreadCrumb(root);
                 this.renderProduct(root);
             }
         }
+    }
+
+    renderBreadCrumb(root: HTMLElement) {
+        const breadCrumb = document.createElement('ul');
+        breadCrumb.className = 'breadcrumb';
+        breadCrumb.innerHTML = `
+            <li class="breadcrumb__item">
+                <a  class="breadcrumb__link router-link"
+                    target="_blank" 
+                    href="/"
+                >Главная</a>
+            </li>
+            <li class="breadcrumb__item">
+                <a  class="breadcrumb__link router-link"
+                    target="_blank" 
+                    href="/?categories=${this.product?.category}"
+                >${this.product?.category}</a>
+            </li>
+            <li class="breadcrumb__item">
+                <a  class="breadcrumb__link router-link"
+                    target="_blank" 
+                    href="/?brands=${this.product?.brand}"
+                >${this.product?.brand}</a>
+            </li>
+            <li class="breadcrumb__item breadcrumb__item--last">
+                <a  class="breadcrumb__link router-link"
+                    target="_blank" 
+                    href="/?q=${this.product?.title}"
+                >${this.product?.title}</a>
+            </li>`
+            root.appendChild(breadCrumb);
     }
 
     renderProduct(root: HTMLElement) {
@@ -183,11 +216,9 @@ export class DetailController extends Controller {
             rightContainer.append(controlsContainer);
             wrapper.appendChild(rightContainer);
         }
-        root.innerHTML = '';
         root.append(wrapper);
-
-
     }
+    
     setLoading(root: HTMLElement) {
         if (root) {
             const loaderWrapper = document.createElement('div');

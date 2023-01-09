@@ -116,6 +116,37 @@
     }
 }
 
+.breadcrumb {
+    display: flex;
+    font-size: 17px;
+    line-height: 125%;
+    margin-bottom: 20px;
+    &__item {
+        a {
+            color: #6f6f74;
+            text-decoration: none;
+        }
+        cursor: pointer;
+        position: relative;
+        padding-right: 20px;
+        &::after {
+            content: '>';
+            position: absolute;
+            top: 50%;
+            right: 6px;
+            transform: translateY(-50%);
+        }
+        &--last {
+            position:static;
+            a {
+                color: $main;
+            }
+        }
+    }
+
+
+}
+
 @media screen and (hover:hover) {
 
     .product {
@@ -125,6 +156,15 @@
 
         &__buttons button:hover {
             background-color: $hover-color;
+        }
+    }
+
+    .breadcrumb {
+        &__item:hover a {
+            color: $hover-color;
+        }
+        &__item--last:hover a {
+            color: inherit;
         }
     }
 
