@@ -519,7 +519,7 @@ export class MainController extends Controller {
             productComponent.render();
             card.addEventListener('click', (e) => {
                 const target = e.target;
-                if (target && target instanceof HTMLElement) {
+                if (target instanceof HTMLElement) {
                     const btn = target.closest('.product-card__add-btn');
                     if (btn) {
                         if (index !== -1) {

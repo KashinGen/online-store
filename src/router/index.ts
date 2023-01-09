@@ -1,6 +1,7 @@
 import { URLRoute } from './types';
 import { Controller } from '../types/index';
 import { MainController } from '../controllers/main';
+import { DetailController } from '../controllers/detail';
 
 const routes: URLRoute = {
     404: {
@@ -25,7 +26,7 @@ const routes: URLRoute = {
         template: '../pages/detail.html',
         title: 'Корзина',
         description: 'Твоя корзиночка',
-        controller: new MainController(),
+        controller: new DetailController(),
     },
 };
 
