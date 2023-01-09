@@ -8,6 +8,7 @@ import { debounce } from '../util';
 import { OrderSort, Option } from '../types/index';
 import Checkbox from '../components/Checkbox';
 import RangeSlider from '../components/RangeSlider';
+import router from '../router';
 
 export class MainController extends Controller {
     products: Product[] = [];
@@ -38,6 +39,8 @@ export class MainController extends Controller {
         price: [0, 0],
         stock: [0, 0],
     }
+    isPriceChanged: boolean = false;
+    isStockChanged: boolean = false;
     setURLParams(param: string, value: string): void {
         const url = new URL(window.location.href);
         if (value.length !== 0) {
@@ -53,6 +56,10 @@ export class MainController extends Controller {
         const view = searchParams.get('view');
         const sort = searchParams.get('sort');
         const order = searchParams.get('order');
+        const priceTo = searchParams.get('price-to');
+        const priceFrom = searchParams.get('price-from');
+        const stockTo = searchParams.get('stock-to');
+        const stockFrom = searchParams.get('stock-from');
         if (view) {
             const selectedView = this.optionsView.find((item) => item.value === view);
             this.selectedView = selectedView ? selectedView : this.selectedView;
@@ -63,13 +70,24 @@ export class MainController extends Controller {
         if (sort && order) {
             const selectedSort = this.optionsSort.find((item) => item.value === sort && item.order?.toString() === order);
             this.selected = selectedSort ? selectedSort : this.selected;
-        }        
+        }   
+        if (stockFrom && stockTo) {
+            this.filter.stock = [+stockFrom, + stockTo];
+            this.isStockChanged = true;
+        }  
+        if (priceFrom && priceTo) {
+            this.filter.price = [+priceFrom, +priceTo];
+            this.isPriceChanged = true;
+
+        }            
     }
-    async onSearchInputHandler(value: string) {
+
+    onSearchInputHandler(value: string) {
         this.setURLParams('q', value);
         this.search = value;
         this.filterProducts();
     }
+
     async init() {
         const searchWrapper = document.querySelector('.search');
         this.getURLParams();
@@ -80,7 +98,7 @@ export class MainController extends Controller {
             });
             const selectSortWrapper = document.querySelector('.main__select-sort');
             if (selectSortWrapper && selectSortWrapper instanceof HTMLElement) {
-
+                selectSortWrapper.innerHTML = ''
                 this.selectSort = new Select(
                     this.selected,
                     this.optionsSort,
@@ -95,7 +113,7 @@ export class MainController extends Controller {
                 const selectViewWrapper = document.querySelector('.main__select-view');
 
                 if (selectViewWrapper && selectViewWrapper instanceof HTMLElement) {
-
+                    selectViewWrapper.innerHTML = ''
                 const selectView = new Select(
                     this.selectedView,
                     this.optionsView,
@@ -127,19 +145,50 @@ export class MainController extends Controller {
         const list = document.querySelector('.main__products-list');
         if (list && list instanceof HTMLElement) {
             await this.getData(list);
-            await this.getFilter();
+            this.getFilter();
             if (this.selectSort) {
                 this.onSortClickHandler(this.selectSort, this.selected)
             }
+            this.filterProducts();
             await this.renderProducts(list);
         }
         if (this.search) {
             this.onSearchInputHandler(this.search);
         }
+        document.querySelector('.filter__reset-btn')?.addEventListener('click', () => {
+            this.filter = {
+                brands: [],
+                categories: [],
+                price: [...this.filterData.price],
+                stock: [...this.filterData.stock],
+            };            
+            this.filterProducts();
+            this.renderFilter();
+            const list = document.querySelector('.main__products-list');
+            router.push('/');
+            if (list && list instanceof HTMLElement) {
+                this.renderProducts(list);
+            }
+        })
+        document.querySelector('.filter__copy-btn')?.addEventListener('click', (e) => {
+            navigator.clipboard.writeText(window.location.href);
+            const target = e.target;
+            if (target instanceof HTMLButtonElement) {
+                const content = target.textContent;
+                target.textContent = 'Скопировано';
+                setTimeout(() => {
+                    target.textContent = content;
+                }, 1500)                
+            }
+        })
     }
+
     onPriceRangeHandler(value: [number, number]) {
         if (JSON.stringify(this.filter.price) !== JSON.stringify(value)) {
             this.filter.price = value;
+            this.isPriceChanged = true;
+            this.setURLParams('price-from', this.filter.price[0].toString());
+            this.setURLParams('price-to', this.filter.price[1].toString());
             setTimeout(() => {
                 this.filterProducts()
             })
@@ -149,34 +198,30 @@ export class MainController extends Controller {
     onStockRangeHandler(value: [number, number]) {
         if (JSON.stringify(this.filter.stock) !== JSON.stringify(value)) {
             this.filter.stock = value;
+            this.isStockChanged = true;
+            this.setURLParams('stock-from', this.filter.stock[0].toString());
+            this.setURLParams('stock-to', this.filter.stock[1].toString());
             setTimeout(() => {
                 this.filterProducts()
             })
         }
     }
+
     filterProducts() {
         const list = document.querySelector('.main__products-list');
         if (list && list instanceof HTMLElement) {
             this.setLoading(list);
             let products = this.products;
+            let isFilterEmpty = true;
             if (this.filter.brands.length !== 0) {
                 products = products.filter((item) => {
                     return this.filter.brands.includes(item.brand)
                 })
             }
             if (this.filter.categories.length !== 0) {
+                isFilterEmpty = false;
                 products = products.filter((item) => {                    
                     return this.filter.categories.includes(item.category)
-                })
-            }
-            if (JSON.stringify(this.filter.price) !== JSON.stringify(this.filterData.price)) {
-                products = products.filter((item) => {                    
-                    return item.price >= this.filter.price[0] && item.price <= this.filter.price[1]
-                })
-            }
-            if (JSON.stringify(this.filter.stock) !== JSON.stringify(this.filterData.stock)) {
-                products = products.filter((item) => {                    
-                    return item.stock >= this.filter.stock[0] && item.price <= this.filter.stock[1]
                 })
             }
             if (this.search.length !== 0) {
@@ -188,6 +233,33 @@ export class MainController extends Controller {
                     product.price.toString().includes(value) ||
                     product.stock.toString().includes(value)
                 })
+            }
+
+            if (this.isPriceChanged) {
+                products = products.filter((item) => {                    
+                    return item.price >= this.filter.price[0] && item.price <= this.filter.price[1]
+                })
+            }
+            if (this.isStockChanged) {
+                products = products.filter((item) => {                    
+                    return item.stock >= this.filter.stock[0] && item.stock <= this.filter.stock[1]
+                })
+            }
+            if (products.length > 0) {
+                let min = 1000000;
+                let max = 0;
+                let minStock = 1000000;
+                let maxStock = 0;
+                products.forEach((item) => {
+                    min = item.price > min ? min : item.price;
+                    max = item.price < max ? max : item.price;
+                    minStock = item.stock < minStock ? item.stock : minStock;
+                    maxStock = item.stock > maxStock ? item.stock : maxStock;
+                });
+                if (!this.isPriceChanged || !this.isStockChanged) {
+                    this.filter.price = [min, max];
+                    this.filter.stock =  [minStock, maxStock];
+                }
             }
             this.filteredProducts = products;
             this.renderFilter();  
@@ -223,13 +295,14 @@ export class MainController extends Controller {
             max = item.price < max ? max : item.price;
             minStock = item.stock < minStock ? item.stock : minStock;
             maxStock = item.stock > maxStock ? item.stock : maxStock;
-            this.filterData.brands = Object.keys(brands);
-            this.filterData.categories = Object.keys(categories);
-            this.filterData.price = [min, max];
-            this.filterData.stock = [minStock, maxStock];
-            this.filter.price = [min, max];
-            this.filter.stock = [minStock, maxStock];
         });
+        this.filterData.brands = Object.keys(brands);
+        this.filterData.categories = Object.keys(categories);
+        this.filterData.price = [min, max];
+        this.filterData.stock = [minStock, maxStock];
+        this.filter.price = this.filter.price[0] + this.filter.price[1] === 0 ? [min, max] : this.filter.price;
+        this.filter.stock = this.filter.stock[0] + this.filter.stock[1] === 0 ? [minStock, maxStock] : this.filter.stock;
+
         this.renderFilter();
     }
     renderFilter() {
@@ -243,6 +316,8 @@ export class MainController extends Controller {
         }
         const priceFilterBlock = document.querySelector('.filter-item.price .filter-item__content');
         if (priceFilterBlock && priceFilterBlock instanceof HTMLElement) {
+            priceFilterBlock.innerHTML = ''
+            this.filter.price[0], this.filter.price[1]
             const slider = new RangeSlider([this.filterData.price[0],this.filterData.price[1]],
                         [this.filter.price[0], this.filter.price[1]], this.onPriceRangeHandler.bind(this), {
                 selector: priceFilterBlock,
@@ -252,6 +327,7 @@ export class MainController extends Controller {
         }
         const stockFilterBlock = document.querySelector('.filter-item.stock .filter-item__content');
         if (stockFilterBlock && stockFilterBlock instanceof HTMLElement) {
+            stockFilterBlock.innerHTML = ''
             const slider = new RangeSlider([this.filterData.stock[0],this.filterData.stock[1]],
                         [this.filter.stock[0], this.filter.stock[1]], this.onStockRangeHandler.bind(this), {
                 selector: stockFilterBlock,

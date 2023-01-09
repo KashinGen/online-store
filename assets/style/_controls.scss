@@ -63,7 +63,28 @@
         font-weight: 600;
         font-size: 24px;
         line-height: 100%;
+        margin-bottom: 15px;
+    }
+    &__controls {
         margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 10px;
+        button {
+            display: flex;
+            align-items: center;
+            width: fit-content;
+            height: 30px;
+            color: #797979;
+            border: none;
+            outline: none;
+            background-color: inherit;
+            font-size: 17px;
+            line-height: 125%;
+            cursor: pointer;
+            transition: all .4s;
+        }
     }
     &-item + &-item {
         margin-top: 12px;
@@ -90,7 +111,6 @@
                 background-color: $main;
                 border-radius: 2px;
                 height: 40px !important;
-
             }
         }
         &__title {
@@ -236,5 +256,10 @@
 @media screen and (hover: hover) {
     .checkbox:hover .checkmark {
         background-image: url('../img/checkbox_hover.svg')
+    }
+    .filter {
+        &__controls button:hover {
+            color: $main;
+        }
     }
 }

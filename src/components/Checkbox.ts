@@ -10,12 +10,12 @@ class Checkbox extends Component {
 
     render() {
         this.template = `
-            <label class="checkbox ${this.props.disabled ? 'disabled' : ''}">
+            <label class="checkbox ${this.props.disabled && !this.props.checked ? 'disabled' : ''}">
                 <input  type="checkbox" 
                         value="${this.props.value}" 
                         name="${this.props.name}" 
                         ${this.props.checked ? 'checked' : ''}
-                        ${this.props.disabled ? 'disabled' : ''}
+                        ${this.props.disabled && !this.props.checked ? 'disabled' : ''}
                         />
                 <span class="checkmark"></span>${this.props.label}
             </label>`;

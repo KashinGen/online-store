@@ -42,7 +42,12 @@ class RangeSlider extends Component {
             </div>
         </div>`
         super.render();
-        if (this.eventsInited) return;
+        if (this.eventsInited) {
+            slideOne();
+            slideTwo();
+            fillColor();
+            return;
+        }
         this.eventsInited = true;
         let sliderOne = this.selector.querySelector(".range__input-min");
         let sliderTwo = this.selector.querySelector(".range__input-max");
@@ -122,6 +127,7 @@ class RangeSlider extends Component {
             if (sliderOne && sliderTwo && sliderOne instanceof HTMLInputElement && sliderTwo instanceof HTMLInputElement) {
                 const percent1: number = (+sliderOne.value / sliderMaxValue) * 100;
                 const percent2: number = (+sliderTwo.value / sliderMaxValue) * 100;
+                
                 if (sliderTrack && sliderTrack instanceof HTMLElement) {
                     sliderTrack.style.background = `linear-gradient(to right, #dadae5 ${percent1}% , #151517 ${percent1}% , #151517 ${percent2}%, #dadae5 ${percent2}%)`;
 

@@ -48,6 +48,8 @@ const urlRoute = (e: Event) => {
         if (target && (target instanceof HTMLElement || target instanceof SVGElement)) {
             const href = target.closest('.router-link');
             if (e.target && href instanceof HTMLAnchorElement) {
+                console.log(href.href);
+                
                 window.history.pushState({}, '', href.href);
                 urlLocationHandler();
             }
@@ -57,6 +59,8 @@ const urlRoute = (e: Event) => {
 
 const urlLocationHandler = async () => {
     let location = window.location.pathname;
+    console.log(location);
+    
     if (location.length === 0) {
         location = '/';
     }
@@ -79,9 +83,16 @@ const urlLocationHandler = async () => {
     }
 };
 
+const push = (path: string | number) => {
+    const href = window.location.origin + path.toString();
+    window.history.pushState({}, '', href);
+    urlLocationHandler();
+}
+
 const router = {
     urlLocationHandler,
     routes,
     urlRoute,
+    push
 };
 export default router;
