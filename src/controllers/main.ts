@@ -65,7 +65,7 @@ export class MainController extends Controller {
             document.querySelector('.input-search__input')?.addEventListener('input', debounce(async (e) => {
                 const target = e.target;
                 if (target instanceof HTMLInputElement) {
-                    const value = target.value;
+                    const value = target.value.toLowerCase();
                     if (list && list instanceof HTMLElement) {
                         this.setLoading(list);
                         this.filteredProducts = this.products.filter(product => {
@@ -74,10 +74,11 @@ export class MainController extends Controller {
                             product.description.toLowerCase().includes(value) ||
                             product.price.toString().includes(value) ||
                             product.stock.toString().includes(value)
-                        })                    
-                            setTimeout(() => {
-                                this.renderProducts(list);
-                            }, 100);
+                        })
+                        this.getFoundCount();                   
+                        setTimeout(() => {
+                            this.renderProducts(list);
+                        }, 100);
                         }
                 }}, 250)
             );
@@ -90,6 +91,12 @@ export class MainController extends Controller {
     }
     onStockRangeHandler() {
 
+    }
+    getFoundCount() {
+        const countContainer = document.querySelector('.main__products-found span');
+        if (countContainer) {
+            countContainer.innerHTML = this.filteredProducts.length.toString();
+        }
     }
     async getFilter() {
         const brands: { [key: string]: boolean } = {};
@@ -190,6 +197,7 @@ export class MainController extends Controller {
             if (data.products && data.products.length > 0) {
                 this.products = data.products;
                 this.filteredProducts = data.products;
+                this.getFoundCount();
                 this.renderProducts(list);
             }
         }
