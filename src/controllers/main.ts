@@ -53,7 +53,7 @@ export class MainController extends Controller {
     getURLParams(): void {
         const searchParams = new URLSearchParams(window.location.search);
         const categories = searchParams.getAll('categories');
-        const brands = searchParams.getAll('brands') 
+        const brands = searchParams.getAll('brands');
         const search = searchParams.get('q');
         const view = searchParams.get('view');
         const sort = searchParams.get('sort');
@@ -89,8 +89,6 @@ export class MainController extends Controller {
         if (brands) {
             this.filter.brands.push(...brands);
         }
-        console.log(this.filter);
-        
     }
 
     onSearchInputHandler(value: string) {
