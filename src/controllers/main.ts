@@ -52,6 +52,8 @@ export class MainController extends Controller {
     }
     getURLParams(): void {
         const searchParams = new URLSearchParams(window.location.search);
+        const categories = searchParams.getAll('categories');
+        const brands = searchParams.getAll('brands') 
         const search = searchParams.get('q');
         const view = searchParams.get('view');
         const sort = searchParams.get('sort');
@@ -81,6 +83,14 @@ export class MainController extends Controller {
             this.filter.price = [+priceFrom, +priceTo];
             this.isPriceChanged = true;
         }
+        if (categories) {
+            this.filter.categories.push(...categories);
+        }
+        if (brands) {
+            this.filter.brands.push(...brands);
+        }
+        console.log(this.filter);
+        
     }
 
     onSearchInputHandler(value: string) {
@@ -364,6 +374,7 @@ export class MainController extends Controller {
                         } else {
                             this.filter[type].push(value);
                         }
+                        this.setURLParams(type, this.filter[type].join(''));
                     }
                     this.filterProducts();
                 }
