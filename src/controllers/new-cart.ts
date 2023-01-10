@@ -4,30 +4,126 @@ import { CartAction, CartItem, Controller } from "../types";
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
+    cartToShow: CartItem[] = [];
     sum: number = 0;
     count: number = 0;
+    limit: number = 3;
+    currentPage: number = 1;
+    allPages: number = 1;
 
     init() {        
         const cartJSON = localStorage.getItem('cart');
         this.cart = cartJSON ? JSON.parse(cartJSON) : [];
+        this.getCartToShow();
         this.render();
+    }
+    getCartToShow() {
+        this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
+        this.allPages = Math.ceil(this.cart.length / this.limit);    
     }
     render() {
         const root = document.querySelector('.cart__inner');
         if (root instanceof HTMLElement) {
+            let leftContainer = root.querySelector('.cart__left');
+            console.log('sdfs');
+            
+            if (!(leftContainer instanceof HTMLElement)) {
+                leftContainer = document.createElement('div');
+                leftContainer.className = 'cart__left';
+            }
             this.getSumAndCount();
             if (this.cart.length !== 0) {
-                this.renderCart(root);
+                if (leftContainer instanceof HTMLElement) {
+                    console.log('sdfsdf');
+                    this.renderCartControls(leftContainer);
+                    this.renderCartItems(leftContainer);
+                    root.append(leftContainer);
+                }
+                this.renderCartInfo(root);
             } else {
                 this.renderEmpty(root);
             }
         }
     }
-    renderCart(root: HTMLElement) {
-        this.renderCartItems(root);
-        this.renderCartInfo(root);
-    }
+    renderCartControls(root: HTMLElement) {
+        let cart_controls = document.querySelector('.cart__controls');
+        if (!(cart_controls instanceof HTMLElement)) {
+            cart_controls = document.createElement('div');
+            cart_controls.className = 'cart__controls';
+        }
+        cart_controls.innerHTML = '';
+        const title = document.createElement('h1');
+        title.className = 'cart__title';
+        title.innerHTML = 'Корзина';
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'cart__controls-container';
+        // лимит товара на странице
+        const limit = document.createElement('div');
+        limit.className = 'cart__limit';
+        const limitSpan = document.createElement('span');
+        limitSpan.innerHTML = 'Товаров на странице:';
+        const limitInput = document.createElement('input');
+        limitInput.className = 'cart__limit-number';
+        limitInput.type = 'number';
+        limitInput.min = '1';
+        limitInput.max = this.allPages.toString();
+        limitInput.value = this.currentPage.toString();
+        limitInput.addEventListener('input', (e) => {
+            const target = e.target;
+            if (target instanceof HTMLInputElement) {
+                const value = target.value;
+                if (+value > this.cart.length) {
+                    target.value = this.cart.length.toString();
+                    this.limit = +value;
+                } else if (+value < 1) {
+                    target.value = '1';
+                    this.limit = 1;
+                } else {
+                    this.limit = + value;
+                }
+            }
+        });
+        limit.append(limitSpan, limitInput);
+        // блок пагинации
+        const pagination = document.createElement('div');
+        pagination.className = 'cart__pagination';
+        const btnPrev = document.createElement('button');
+        btnPrev.textContent = '&lt;';
+        btnPrev.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target instanceof HTMLButtonElement) {
+                if (+target.value < 0) {
+                    target.value = '1';
+                    this.currentPage = 1;
+                } else {
+                    this.currentPage = +target.value;
+                }
+            }
+        });
+        const btnNext = document.createElement('button');
+        btnNext.textContent = '&gt;';
+        btnNext.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target instanceof HTMLButtonElement) {
+                if (+target.value > this.allPages) {
+                    target.value = this.allPages.toString();
+                    this.currentPage = this.allPages;
+                } else {
+                    this.currentPage = +target.value;
+                }
+            }
+        });
+        const currentPage = document.createElement('span');
+        currentPage.innerHTML = this.currentPage.toString();
+        pagination.append(btnPrev, currentPage, btnNext);
 
+        controlsContainer.append(limit, pagination);
+
+        cart_controls.append(title, controlsContainer);
+        console.log(cart_controls);
+        
+        root.append(cart_controls);
+    }
     renderCartItems(root: HTMLElement) {
         let cart_list = document.querySelector('.cart__list');
         if (!(cart_list instanceof HTMLElement)) {
@@ -35,7 +131,7 @@ export class CartController extends Controller {
             cart_list.className = 'cart__list';
         }
         cart_list.innerHTML = '';
-        this.cart.forEach((cart_item) => {
+        this.cartToShow.forEach((cart_item) => {
             const cartItem = document.createElement('div');
             cartItem.className = 'cart-item';
             const cartItemComponent = new CartItemComponent(
