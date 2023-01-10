@@ -24,13 +24,12 @@ export class CartController extends Controller {
     render() {
         const root = document.querySelector('.cart__inner');
         if (root instanceof HTMLElement) {
-            let leftContainer = root.querySelector('.cart__left');
-            console.log('sdfs');
-            
+            let leftContainer = root.querySelector('.cart__left');            
             if (!(leftContainer instanceof HTMLElement)) {
                 leftContainer = document.createElement('div');
                 leftContainer.className = 'cart__left';
             }
+            this.getCartToShow();
             this.getSumAndCount();
             if (this.cart.length !== 0) {
                 if (leftContainer instanceof HTMLElement) {
@@ -153,8 +152,6 @@ export class CartController extends Controller {
             cart_list = document.createElement('div');
             cart_list.className = 'cart__list';
         }
-        console.log('render');
-        
         cart_list.innerHTML = '';
         this.cartToShow.forEach((cart_item) => {
             const cartItem = document.createElement('div');
@@ -178,6 +175,13 @@ export class CartController extends Controller {
         if (action === CartAction.DECREASE) {
             if (this.cart[index].count - 1  === 0) {
                 this.cart = [...this.cart.slice(0, index), ...this.cart.slice(index + 1)];
+                this.getCartToShow();
+                if (this.cartToShow.length === 0) {
+                    if (this.currentPage > 1) {
+                        this.currentPage -= 1;
+                    }
+                }
+                
             } else {
                 this.cart[index].count -= 1;
             }
@@ -186,7 +190,7 @@ export class CartController extends Controller {
             if (this.cart[index].count + 1 > this.cart[index].product.stock) return;
             this.cart[index].count += 1;
         }
-        localStorage.setItem('cart', JSON.stringify(this.cart));
+        localStorage.setItem('cart', JSON.stringify(this.cart));        
         this.render();
     }
     renderCartInfo(root: HTMLElement) {
