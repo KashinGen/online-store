@@ -1,30 +1,34 @@
 import { URLRoute } from './types';
 import { MainController } from '../controllers/main';
 import { DetailController } from '../controllers/detail';
+const templateMain = require('../pages/main.html').default;
+const template404 = require('../pages/404.html').default;
+const templateCart = require('../pages/cart.html').default;
+const templateDetail = require('../pages/detail.html').default;
 
 const routes: URLRoute = {
     404: {
-        template: '../pages/404.html',
+        template: template404,
         title: 'Ничего не нашли :(',
         description: 'Ничего не нашли :(',
         controller: null,
     },
     '/': {
-        template: '../pages/main.html',
+        template: templateMain,
         title: 'Онлайн магазин',
         description: 'Купи чё хочешь',
         controller: new MainController(),
     },
     '/cart': {
-        template: '../pages/cart.html',
+        template: templateCart,
         title: 'Корзина',
         description: 'Твоя корзиночка',
         controller: new MainController(),
     },
     '/detail': {
-        template: '../pages/detail.html',
-        title: 'Корзина',
-        description: 'Твоя корзиночка',
+        template: templateDetail,
+        title: 'Детали товара',
+        description: 'Детали товара',
         controller: new DetailController(),
     },
 };
@@ -65,10 +69,11 @@ const urlLocationHandler = async () => {
         location = '/detail';
     }
     const route = routes[location] || routes[404];
-    const html = await fetch(route.template).then((resp) => resp.text());
+    console.log(route.template);
+    const html = route.template;
     const root = document.getElementById('app');
     if (root) {
-        root.innerHTML = html;
+        root.innerHTML = html.trim();
         document.title = route.title;
         if (route.controller) {
             route.controller.init();
