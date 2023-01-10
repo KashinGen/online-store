@@ -488,103 +488,110 @@ export class MainController extends Controller {
         const fragment = new DocumentFragment();
         const cartJSON = localStorage.getItem('cart');
         const cart = cartJSON ? JSON.parse(cartJSON) : [];
-        this.filteredProducts.forEach((product) => {
-            const card = document.createElement('div');
-            card.classList.add('product-card');
-            const index = cart.findIndex((item: CartItem) => item.product.id === product.id);
-            const isInCart = index !== -1;
-            const productComponent = new ProductItemComponent(product, {
-                selector: card,
-                template: `<a href="/detail/${product.id}" target='_blank' class="router-link">
-                    <div class='product-card__img-wrapper'>
-                        <div class="product-card__img" style="background: url('${
-                            product.thumbnail
-                        }') center/cover"></div>
-                    </div>
-                </a>
-                <div class="product-card__content">
-                    <div class="product-card__reviews-container">
-                        <div class="product-card__rating ${product.rating >= 4.5 ? 'blue' : ''}">
-                            <span class='product-card__rating-star'></span>
-                            <span class='product-card__rating-number'>${product.rating.toFixed(1)}</span>
+        if (this.filteredProducts.length !== 0) {
+            this.filteredProducts.forEach((product) => {
+                const card = document.createElement('div');
+                card.classList.add('product-card');
+                const index = cart.findIndex((item: CartItem) => item.product.id === product.id);
+                const isInCart = index !== -1;
+                const productComponent = new ProductItemComponent(product, {
+                    selector: card,
+                    template: `<a href="/detail/${product.id}" target='_blank' class="router-link">
+                        <div class='product-card__img-wrapper'>
+                            <div class="product-card__img" style="background: url('${
+                                product.thumbnail
+                            }') center/cover"></div>
                         </div>
-                        <div class="product-card__price">${product.price} €</div>
-                    </div>
-                    <a href="/detail/${product.id}" target='_blank' class="router-link product-card__name">
-                        ${product.title}
                     </a>
-                    <ul class="product-card__info">
-                        <li>
-                            <span>Бренд</span>
-                            <span></span>
-                            <span>${product.brand}</span>
-                        </li>
-                        <li>
-                            <span>Категория</span>
-                            <span></span>
-                            <span>${product.category}</span>
-                        </li>
-                        <li>
-                            <span>В наличии</span>
-                            <span></span>
-                            <span>${product.stock} шт.</span>
-                        </li>
-                    </ul>
-                    <div style='flex: 1 1 0%'></div>
-                </div>
-                <button class='product-card__add-btn'>
-                    <span class='product-card__add-btn-text'>${isInCart ? 'В корзине' : 'В корзину'}</span>
-                    <span class='product-card__add-btn-icon'></span>
-                </button>
-                `,
-            });
-            fragment.append(card);
-            productComponent.render();
-            card.addEventListener('click', (e) => {
-                const target = e.target;
-                if (target instanceof HTMLElement) {
-                    const btn = target.closest('.product-card__add-btn');
-                    if (btn) {
-                        if (index !== -1) {
-                            if (cart[index].product.stock > cart[index].count + 1) {
-                                cart[index].count++;
+                    <div class="product-card__content">
+                        <div class="product-card__reviews-container">
+                            <div class="product-card__rating ${product.rating >= 4.5 ? 'blue' : ''}">
+                                <span class='product-card__rating-star'></span>
+                                <span class='product-card__rating-number'>${product.rating.toFixed(1)}</span>
+                            </div>
+                            <div class="product-card__price">${product.price} €</div>
+                        </div>
+                        <a href="/detail/${product.id}" target='_blank' class="router-link product-card__name">
+                            ${product.title}
+                        </a>
+                        <ul class="product-card__info">
+                            <li>
+                                <span>Бренд</span>
+                                <span></span>
+                                <span>${product.brand}</span>
+                            </li>
+                            <li>
+                                <span>Категория</span>
+                                <span></span>
+                                <span>${product.category}</span>
+                            </li>
+                            <li>
+                                <span>В наличии</span>
+                                <span></span>
+                                <span>${product.stock} шт.</span>
+                            </li>
+                        </ul>
+                        <div style='flex: 1 1 0%'></div>
+                    </div>
+                    <button class='product-card__add-btn'>
+                        <span class='product-card__add-btn-text'>${isInCart ? 'В корзине' : 'В корзину'}</span>
+                        <span class='product-card__add-btn-icon'></span>
+                    </button>
+                    `,
+                });
+                fragment.append(card);
+                productComponent.render();
+                card.addEventListener('click', (e) => {
+                    const target = e.target;
+                    if (target instanceof HTMLElement) {
+                        const btn = target.closest('.product-card__add-btn');
+                        if (btn) {
+                            if (index !== -1) {
+                                if (cart[index].product.stock > cart[index].count + 1) {
+                                    cart[index].count++;
+                                }
+                            } else {
+                                cart.push({
+                                    product: product,
+                                    count: 1,
+                                });
+                                const btnText = btn.querySelector('.product-card__add-btn-text');
+                                if (btnText) {
+                                    btnText.innerHTML = 'В корзине';
+                                }
                             }
-                        } else {
-                            cart.push({
-                                product: product,
-                                count: 1,
-                            });
-                            const btnText = btn.querySelector('.product-card__add-btn-text');
-                            if (btnText) {
-                                btnText.innerHTML = 'В корзине';
+                            localStorage.setItem('cart', JSON.stringify(cart));
+                            const cart_sum = document.querySelector('.header__cart-info-count span');
+                            const { sum, count } = cart.reduce(
+                                (acc: { count: number; sum: number }, cartItem: CartItem) => {
+                                    acc.sum += cartItem.product.price * cartItem.count;
+                                    acc.count += cartItem.count;
+                                    return acc;
+                                },
+                                { count: 0, sum: 0 }
+                            );
+                            if (cart_sum) {
+                                cart_sum.innerHTML = sum;
                             }
-                        }
-                        localStorage.setItem('cart', JSON.stringify(cart));
-                        const cart_sum = document.querySelector('.header__cart-info-count span');
-                        const { sum, count } = cart.reduce(
-                            (acc: { count: number; sum: number }, cartItem: CartItem) => {
-                                acc.sum += cartItem.product.price * cartItem.count;
-                                acc.count += cartItem.count;
-                                return acc;
-                            },
-                            { count: 0, sum: 0 }
-                        );
-
-                        if (cart_sum) {
-                            cart_sum.innerHTML = sum;
-                        }
-                        const cart_icon = document.querySelector('.header__cart-link');
-                        if (cart_icon) {
-                            cart_icon.setAttribute('data-count', count);
-                            if (count > 0) {
-                                cart_icon.classList.add('on');
+                            const cart_icon = document.querySelector('.header__cart-link');
+                            if (cart_icon) {
+                                cart_icon.setAttribute('data-count', count);
+                                if (count > 0) {
+                                    cart_icon.classList.add('on');
+                                }
                             }
                         }
                     }
-                }
+                });
             });
-        });
-        root.innerHTML = '';
-        root.append(fragment);
+            root.innerHTML = '';
+            root.append(fragment);
+        } else {
+            const notFoundWrapper = document.createElement('div');
+            notFoundWrapper.className = 'main__not-found';
+            notFoundWrapper.innerHTML = 'Ой, сори, мы не нашли товаров :(';
+            root.innerHTML = '';
+            root.append(notFoundWrapper);
+        }
     }
 }
