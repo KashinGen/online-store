@@ -113,7 +113,7 @@ rigthColum.insertAdjacentHTML('afterbegin', block2)
 function repitMakeTable(data ,i){
 const block1 = `  <div class="show-product";
 flex-direction: column-reverse;">
-<div class="show-product_title reverse">
+<div class="show-product_title ">
     <span class="text">Products In Cart</span>
     <div class="wrapper-porduct">
         <div class="number">
@@ -200,24 +200,17 @@ for(let i = 0; i< priceItem.length; i++){
 }
     sumProducts.innerHTML = `${arrayCount.reduce((a,b)=>{ return a+b})}`
     const total = arrayPrice.map((val, i ) =>{ return val  *  data.products[i].count}).reduce((a,b)=>{ return a+b})
-    totalCosts.innerHTML = `Products: ${total}` ; 
+    totalCosts.innerHTML = `Products: ${total}$` ; 
     
     if(arrayPromo.length == 1){
         totalCosts.innerHTML= `Total: ${Math.floor(total / 100 * 90)}$`;
-        totalCosts.insertAdjacentHTML('afterend', blockWithPromo);
+        // totalCosts.insertAdjacentHTML('afterend', blockWithPromo);
     }else if(arrayPromo.length == 2){
         totalCosts.innerHTML= `Total: ${Math.floor(total  / 100 * 80)}$`;
-        totalCosts.insertAdjacentHTML('afterend', blockWithPromo);
+        // totalCosts.insertAdjacentHTML('afterend', blockWithPromo);
     }
 }finalCost()
      
-
-
-
-
-
-
-
 function promocodeOn () {
   const promocode = document.querySelector('.promocode');
   promocode.oninput = () =>{
@@ -225,15 +218,15 @@ function promocodeOn () {
       const blockSubmitPromo = `<div class = 'blockSubmitPromo'>${promocode.value} - 10% <button class='add-promo'>add</button></div>`;
       promocode.insertAdjacentHTML('afterend', blockSubmitPromo)
       promocodeADD()
-  }else{    document.querySelector('.blockSubmitPromo').remove(document.querySelector('.blockSubmitPromo'))}
+  }else{
+    document.querySelector('.blockSubmitPromo').remove()}
   } 
 }promocodeOn()
-
 
 function promocodeADD(){
   const addPromo = document.querySelector('.add-promo');
   const promocode = document.querySelector('.promocode');
-  const blockWithPromo = `<spam>${promocode.value} - 10%<button class='bth-drop'>drop</button></spam>`;
+  const blockWithPromo = `<spam class='promo${arrayPromo.length}'>${promocode.value} - 10%<button class='bth-drop${arrayPromo.length}'>drop</button></spam>`;
   const totalCost = document.querySelector('.total_cost');
   const isPromo = arrayPromo.every(el => el !== promocode.value)
   if(isPromo){
@@ -243,17 +236,30 @@ function promocodeADD(){
       totalCost.insertAdjacentHTML('afterend', blockWithPromo);
       document.querySelector('.blockSubmitPromo').remove(document.querySelector('.blockSubmitPromo'))
       promocode.value="";
+      promocodeDrop()
       }
   )}else{alert('you used this promo')}
 }
 
-        
-
-
-
-
+function promocodeDrop(){
+    const drop0 = document.querySelector('.bth-drop0');
+    drop0.addEventListener('click', ()=>{
+        document.querySelector('.promo0').remove()
+        arrayPromo.shift()
+        finalCost()
+    })
+    
+    const drop1 = document.querySelector('.bth-drop1');
+    if(drop1){
+    drop1.addEventListener('click', ()=>{
+        document.querySelector('.promo1').remove();
+        arrayPromo.pop()
+        finalCost()
+    })}
+}        
 
 const bthBuyNow = document.querySelector('.bth-buy-now');
+console.log(bthBuyNow)
         bthBuyNow.addEventListener('click', ()=>{
 
             const blockCreditCard = `
@@ -283,30 +289,26 @@ const bthBuyNow = document.querySelector('.bth-buy-now');
 
             function nameValid (){
                 const name = document.querySelector('.name');
-                if(name.value.length < 2 && name.value.length >1){document.querySelector('.error-name').innerHTML = 'ERROR'}
                 name.oninput = () =>{
                     const str = (name.value).split(' ');
                     if(str[0].length<3 || str[1].length<3){
-                        
                         document.querySelector('.error-name').innerHTML ='ERROR'
                     }else{document.querySelector('.error-name').innerHTML =''}
                 }
             }nameValid()
 
             function phoneValid () {
-                const phone = document.querySelector('.phone');
-                if(phone.value.length === 0){document.querySelector('.error-phone').innerHTML = 'ERROR'}
+                const phone = document.querySelector('.phone')
                 phone.oninput = () =>{
                     const number = (phone.value).split('').map(el=>+el);
                     if(number.length < 9 || phone.value[0] === undefined){
                         document.querySelector('.error-phone').innerHTML = "ERROR"
                     }else(document.querySelector('.error-phone').innerHTML = "")
                 }
-            }
+            }phoneValid()
 
             function adressValid(){
-                const adres = document.querySelector('.adress');
-                if(adres.value.length === 0){document.querySelector('.error-adress').innerHTML = 'ERROR'} 
+                const adres = document.querySelector('.adress'); 
                 adres.oninput = () =>{
                    const arrayAdress = adres.value.trim().split(' ');
                     const isTrue = arrayAdress.every(el=> el.length > 2)
@@ -314,25 +316,23 @@ const bthBuyNow = document.querySelector('.bth-buy-now');
                     document.querySelector('.error-adress').innerHTML = "ERROR"
                 }else(document.querySelector('.error-adress').innerHTML = "")
                    }
-            }
+            }adressValid()
 
 
-            
+            function mailValid(){
             const email = document.querySelector('.mail');
-           const mailValid = email.oninput = ()=> {
-            if(email.value.length === 0){document.querySelector('.error-mail').innerHTML = "ERROR"}
+             email.oninput = () => {
                 const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
                 if (EMAIL_REGEXP.test(email.value)) {
                 document.querySelector('.error-mail').innerHTML = ""
               } else {
                 document.querySelector('.error-mail').innerHTML = "ERROR"
               }
-            };mailValid()
+            }};mailValid()
 
             function cardValid (){
                 const card = document.querySelector('.cardnumber');
                 const typeCard = document.querySelector('.type-card');
-                if(card.value.length === 0){document.querySelector('.error-card').innerHTML = 'ERROR'} 
                 card.oninput= () =>{
 
                     switch (card.value[0]) {
@@ -350,55 +350,71 @@ const bthBuyNow = document.querySelector('.bth-buy-now');
                    if(card.value.length < 12){
                     document.querySelector('.error-card').innerHTML = 'ERROR'
                    }else{document.querySelector('.error-card').innerHTML = ''}
-                   console.log('again')
+                   
                 }
             }cardValid ()
 
             function expirationDate () {
                 const cardData = document.querySelector('.valid');
-                if(cardData.value.length === 0){document.querySelector('.error-valid').innerHTML = 'ERROR'}
                 cardData.oninput = (e) =>{
+                    const month = cardData.value.slice(0,2) <= 31 && cardData.value.slice(0,2) != 0;
+                    const year = cardData.value.slice(3) <= 12 && cardData.value.slice(3) != 0;
+                    console.log()
                     const value = e.target.value.length > 2 ? e.target.value.slice(0, 2) + e.target.value.slice(3) : e.target.value
-                    console.log(value)
                     if (isNaN(value)){
-                        console.log('not number')
                         e.target.value = e.target.value.slice(0, e.target.value.length - 1)
                     }
                     if(cardData.value.length === 2){
                         cardData.value += '/';
-                }}
+                    }
+                    if(!(cardData.value.length > 4 && month && year)){
+                        document.querySelector('.error-valid').innerHTML = 'ERROR'
+                       }else{document.querySelector('.error-valid').innerHTML = ''}
+                }
             }expirationDate ()
 
 
 
             function codeValid(){
                 const cvv = document.querySelector('.cvv');
-                if(cvv.value.length === 0){document.querySelector('.error-code').innerHTML = 'ERROR'} 
                 cvv.oninput = () =>{
                     if(cvv.value.length < 3){
                         document.querySelector('.error-code').innerHTML = 'ERROR'
                     }else{document.querySelector('.error-code').innerHTML = ''}
                 }
-                
-            }expirationDate ()
+               return cvv.value 
+            }codeValid()
         
             document.querySelector('.bth-submit').addEventListener('click', ()=>{
-                codeValid();
-                expirationDate();
-                cardValid();
-                mailValid();
-                adressValid();
-                phoneValid();
-                nameValid();
-                let array = [];
+                const cvv = document.querySelector('.cvv');
+                const cardData = document.querySelector('.valid');
+                const card = document.querySelector('.cardnumber');
+                const email = document.querySelector('.mail');
+                const adres = document.querySelector('.adress'); 
+                const phone = document.querySelector('.phone');
+                const name = document.querySelector('.name');
+                
+//    document.querySelector('.error-card').innerHTML = 'ERROR'} 
+//        document.querySelector('.error-mail').innerHTML = "ERROR"}
+//        document.querySelector('.error-adress').innerHTML = 'ERROR'}
+//                document.querySelector('.error-valid').innerHTML = 'ERROR'}
+//document.querySelector('.error-code').innerHTML = 'ERROR'} 
+//        document.querySelector('.error-phone').innerHTML = 'ERROR'}
+                let array = [document.querySelector('.cvv'),
+                document.querySelector('.valid'),
+                ent.querySelector('.cardnumber'),
+                 document.querySelector('.mail'),
+                cument.querySelector('.adress'),
+                document.querySelector('.phone'),
+                 document.querySelector('.name'),];
+                 const isTrue =array.every(el => el.textContent >0)
                 const error = document.querySelectorAll('.error')
-                error.forEach(el => {array.push(el.textContent)})
-                if(array.every(el =>{el !== 'ERROR' })){console.log('true')}
+                if(error.forEach(el => {console.log(el.textContent != "ERROR")})){alert('ваш зака принят')
+                data.products = []}
 
             })
             
 })
-
 
   //    let arrayPrice = [...data.products].reverse()
         //    priceItem[index].textContent = +priceItem[index].textContent.slice(0, -1) - arrayPrice[index].price +'$';
