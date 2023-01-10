@@ -1,6 +1,6 @@
 .main {
     padding: 40px 0 80px;
-    .main__inner {
+    &__inner {
         display: flex;
     }
     &__not-found {

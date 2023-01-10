@@ -124,6 +124,7 @@
         flex-direction: row;
         align-items: center;
         padding: 10px;
+        transition:  all .4s;
         &__img-wrapper {
             width: 265px;
             height: 265px;
@@ -155,6 +156,14 @@
         }
         &__name:hover {
             color: $hover-color;
+        }
+    }
+    .main__products-list.list {
+        .product-card:hover {
+            box-shadow: -1px 1px 17px -1px $hover-color;
+            .product-card__img {
+                transform: unset;
+            }
         }
     }
 }
