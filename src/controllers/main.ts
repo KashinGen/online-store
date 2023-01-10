@@ -13,32 +13,32 @@ import router from '../router';
 export class MainController extends Controller {
     products: Product[] = [];
     filteredProducts: Product[] = [];
-    optionsSort:Option[] = [
+    optionsSort: Option[] = [
         { value: 'alphabet', order: OrderSort.ASC, label: 'По алфавиту' },
         { value: 'price', order: OrderSort.ASC, label: 'По возрастанию цены' },
         { value: 'price', order: OrderSort.DESC, label: 'По убыванию цены' },
         { value: 'rating', order: OrderSort.ASC, label: 'По рейтингу' },
     ];
-    selected:Option = this.optionsSort[0];
-    optionsView: Option[]= [
+    selected: Option = this.optionsSort[0];
+    optionsView: Option[] = [
         { value: ProductViewMode.TABLE, label: 'Таблицей' },
         { value: ProductViewMode.LIST, label: 'Списком' },
     ];
     selectSort: Select | null = null;
-    selectedView:Option = this.optionsView[0];
+    selectedView: Option = this.optionsView[0];
     search = '';
     filter: Filter = {
         brands: [],
         categories: [],
         price: [0, 0],
         stock: [0, 0],
-    }
+    };
     filterData: Filter = {
         brands: [],
         categories: [],
         price: [0, 0],
         stock: [0, 0],
-    }
+    };
     isPriceChanged: boolean = false;
     isStockChanged: boolean = false;
     setURLParams(param: string, value: string): void {
@@ -46,7 +46,7 @@ export class MainController extends Controller {
         if (value.length !== 0) {
             url.searchParams.set(param, value);
         } else {
-            url.searchParams.delete(param)
+            url.searchParams.delete(param);
         }
         history.pushState(null, '', url);
     }
@@ -68,18 +68,19 @@ export class MainController extends Controller {
             this.search = search.toLowerCase();
         }
         if (sort && order) {
-            const selectedSort = this.optionsSort.find((item) => item.value === sort && item.order?.toString() === order);
+            const selectedSort = this.optionsSort.find(
+                (item) => item.value === sort && item.order?.toString() === order
+            );
             this.selected = selectedSort ? selectedSort : this.selected;
-        }   
+        }
         if (stockFrom && stockTo) {
-            this.filter.stock = [+stockFrom, + stockTo];
+            this.filter.stock = [+stockFrom, +stockTo];
             this.isStockChanged = true;
-        }  
+        }
         if (priceFrom && priceTo) {
             this.filter.price = [+priceFrom, +priceTo];
             this.isPriceChanged = true;
-
-        }            
+        }
     }
 
     onSearchInputHandler(value: string) {
@@ -98,22 +99,17 @@ export class MainController extends Controller {
             });
             const selectSortWrapper = document.querySelector('.main__select-sort');
             if (selectSortWrapper && selectSortWrapper instanceof HTMLElement) {
-                selectSortWrapper.innerHTML = ''
-                this.selectSort = new Select(
-                    this.selected,
-                    this.optionsSort,
-                    this.onSortClickHandler.bind(this),
-                    {
-                        selector: selectSortWrapper,
-                        template: '',
-                    }
-                );
+                selectSortWrapper.innerHTML = '';
+                this.selectSort = new Select(this.selected, this.optionsSort, this.onSortClickHandler.bind(this), {
+                    selector: selectSortWrapper,
+                    template: '',
+                });
                 this.selectSort.render();
-                }
-                const selectViewWrapper = document.querySelector('.main__select-view');
+            }
+            const selectViewWrapper = document.querySelector('.main__select-view');
 
-                if (selectViewWrapper && selectViewWrapper instanceof HTMLElement) {
-                    selectViewWrapper.innerHTML = ''
+            if (selectViewWrapper && selectViewWrapper instanceof HTMLElement) {
+                selectViewWrapper.innerHTML = '';
                 const selectView = new Select(
                     this.selectedView,
                     this.optionsView,
@@ -127,19 +123,21 @@ export class MainController extends Controller {
                 if (this.selectedView !== this.optionsView[0]) {
                     this.onChangeViewHandler(selectView, this.selectedView);
                 }
-                }
-            
+            }
             search.render();
             const searchInput = document.querySelector('.input-search__input');
             if (this.search && searchInput instanceof HTMLInputElement) {
                 searchInput.value = this.search;
             }
-            searchInput?.addEventListener('input', debounce(async (e) => {
-                const target = e.target;
-                if (target instanceof HTMLInputElement) {
-                    const value = target.value.toLowerCase();
-                    this.onSearchInputHandler(value);
-                }}, 250)
+            searchInput?.addEventListener(
+                'input',
+                debounce(async (e) => {
+                    const target = e.target;
+                    if (target instanceof HTMLInputElement) {
+                        const value = target.value.toLowerCase();
+                        this.onSearchInputHandler(value);
+                    }
+                }, 250)
             );
         }
         const list = document.querySelector('.main__products-list');
@@ -147,7 +145,7 @@ export class MainController extends Controller {
             await this.getData(list);
             this.getFilter();
             if (this.selectSort) {
-                this.onSortClickHandler(this.selectSort, this.selected)
+                this.onSortClickHandler(this.selectSort, this.selected);
             }
             this.filterProducts();
             await this.renderProducts(list);
@@ -161,7 +159,7 @@ export class MainController extends Controller {
                 categories: [],
                 price: [...this.filterData.price],
                 stock: [...this.filterData.stock],
-            };            
+            };
             this.filterProducts();
             this.renderFilter();
             const list = document.querySelector('.main__products-list');
@@ -169,7 +167,7 @@ export class MainController extends Controller {
             if (list && list instanceof HTMLElement) {
                 this.renderProducts(list);
             }
-        })
+        });
         document.querySelector('.filter__copy-btn')?.addEventListener('click', (e) => {
             navigator.clipboard.writeText(window.location.href);
             const target = e.target;
@@ -178,9 +176,9 @@ export class MainController extends Controller {
                 target.textContent = 'Скопировано';
                 setTimeout(() => {
                     target.textContent = content;
-                }, 1500)                
+                }, 1500);
             }
-        })
+        });
     }
 
     onPriceRangeHandler(value: [number, number]) {
@@ -190,9 +188,9 @@ export class MainController extends Controller {
             this.setURLParams('price-from', this.filter.price[0].toString());
             this.setURLParams('price-to', this.filter.price[1].toString());
             setTimeout(() => {
-                this.filterProducts()
-            })
-        }  
+                this.filterProducts();
+            });
+        }
     }
 
     onStockRangeHandler(value: [number, number]) {
@@ -202,8 +200,8 @@ export class MainController extends Controller {
             this.setURLParams('stock-from', this.filter.stock[0].toString());
             this.setURLParams('stock-to', this.filter.stock[1].toString());
             setTimeout(() => {
-                this.filterProducts()
-            })
+                this.filterProducts();
+            });
         }
     }
 
@@ -215,35 +213,37 @@ export class MainController extends Controller {
             let isFilterEmpty = true;
             if (this.filter.brands.length !== 0) {
                 products = products.filter((item) => {
-                    return this.filter.brands.includes(item.brand)
-                })
+                    return this.filter.brands.includes(item.brand);
+                });
             }
             if (this.filter.categories.length !== 0) {
                 isFilterEmpty = false;
-                products = products.filter((item) => {                    
-                    return this.filter.categories.includes(item.category)
-                })
+                products = products.filter((item) => {
+                    return this.filter.categories.includes(item.category);
+                });
             }
             if (this.search.length !== 0) {
                 const value = this.search.toLowerCase();
-                products = products.filter(product => {
-                    return product.title.toLowerCase().includes(value) ||
-                    product.brand.toLowerCase().includes(value) ||
-                    product.description.toLowerCase().includes(value) ||
-                    product.price.toString().includes(value) ||
-                    product.stock.toString().includes(value)
-                })
+                products = products.filter((product) => {
+                    return (
+                        product.title.toLowerCase().includes(value) ||
+                        product.brand.toLowerCase().includes(value) ||
+                        product.description.toLowerCase().includes(value) ||
+                        product.price.toString().includes(value) ||
+                        product.stock.toString().includes(value)
+                    );
+                });
             }
 
             if (this.isPriceChanged) {
-                products = products.filter((item) => {                    
-                    return item.price >= this.filter.price[0] && item.price <= this.filter.price[1]
-                })
+                products = products.filter((item) => {
+                    return item.price >= this.filter.price[0] && item.price <= this.filter.price[1];
+                });
             }
             if (this.isStockChanged) {
-                products = products.filter((item) => {                    
-                    return item.stock >= this.filter.stock[0] && item.stock <= this.filter.stock[1]
-                })
+                products = products.filter((item) => {
+                    return item.stock >= this.filter.stock[0] && item.stock <= this.filter.stock[1];
+                });
             }
             if (products.length > 0) {
                 let min = 1000000;
@@ -258,17 +258,16 @@ export class MainController extends Controller {
                 });
                 if (!this.isPriceChanged || !this.isStockChanged) {
                     this.filter.price = [min, max];
-                    this.filter.stock =  [minStock, maxStock];
+                    this.filter.stock = [minStock, maxStock];
                 }
             }
             this.filteredProducts = products;
-            this.renderFilter();  
-            this.getFoundCount();                       
+            this.renderFilter();
+            this.getFoundCount();
             setTimeout(() => {
-                this.renderProducts(list)
-            },100)
+                this.renderProducts(list);
+            }, 100);
         }
-
     }
 
     getFoundCount() {
@@ -301,53 +300,64 @@ export class MainController extends Controller {
         this.filterData.price = [min, max];
         this.filterData.stock = [minStock, maxStock];
         this.filter.price = this.filter.price[0] + this.filter.price[1] === 0 ? [min, max] : this.filter.price;
-        this.filter.stock = this.filter.stock[0] + this.filter.stock[1] === 0 ? [minStock, maxStock] : this.filter.stock;
-
+        this.filter.stock =
+            this.filter.stock[0] + this.filter.stock[1] === 0 ? [minStock, maxStock] : this.filter.stock;
         this.renderFilter();
     }
     renderFilter() {
         const brandsFilterBlock = document.querySelector('.filter-item.brands');
         if (brandsFilterBlock) {
-            this.renderFilterList(this.filterData.brands, brandsFilterBlock, FilterCheckboxType.BRAND)            
-        }    
+            this.renderFilterList(this.filterData.brands, brandsFilterBlock, FilterCheckboxType.BRAND);
+        }
         const categoriesFilterBlock = document.querySelector('.filter-item.categories');
         if (categoriesFilterBlock) {
-            this.renderFilterList(this.filterData.categories, categoriesFilterBlock, FilterCheckboxType.CATEGORY);        
+            this.renderFilterList(this.filterData.categories, categoriesFilterBlock, FilterCheckboxType.CATEGORY);
         }
         const priceFilterBlock = document.querySelector('.filter-item.price .filter-item__content');
         if (priceFilterBlock && priceFilterBlock instanceof HTMLElement) {
-            priceFilterBlock.innerHTML = ''
-            this.filter.price[0], this.filter.price[1]
-            const slider = new RangeSlider([this.filterData.price[0],this.filterData.price[1]],
-                        [this.filter.price[0], this.filter.price[1]], this.onPriceRangeHandler.bind(this), {
-                selector: priceFilterBlock,
-                template:''
-            });
+            priceFilterBlock.innerHTML = '';
+            this.filter.price[0], this.filter.price[1];
+            const slider = new RangeSlider(
+                [this.filterData.price[0], this.filterData.price[1]],
+                [this.filter.price[0], this.filter.price[1]],
+                this.onPriceRangeHandler.bind(this),
+                {
+                    selector: priceFilterBlock,
+                    template: '',
+                }
+            );
             slider.render();
         }
         const stockFilterBlock = document.querySelector('.filter-item.stock .filter-item__content');
         if (stockFilterBlock && stockFilterBlock instanceof HTMLElement) {
-            stockFilterBlock.innerHTML = ''
-            const slider = new RangeSlider([this.filterData.stock[0],this.filterData.stock[1]],
-                        [this.filter.stock[0], this.filter.stock[1]], this.onStockRangeHandler.bind(this), {
-                selector: stockFilterBlock,
-                template:''
-            });
+            stockFilterBlock.innerHTML = '';
+            const slider = new RangeSlider(
+                [this.filterData.stock[0], this.filterData.stock[1]],
+                [this.filter.stock[0], this.filter.stock[1]],
+                this.onStockRangeHandler.bind(this),
+                {
+                    selector: stockFilterBlock,
+                    template: '',
+                }
+            );
             slider.render();
         }
-        const checkboxes = document.querySelectorAll('.filter-item input[type=checkbox]');          
+        const checkboxes = document.querySelectorAll('.filter-item input[type=checkbox]');
         checkboxes.forEach((element: Element) => {
             element.addEventListener('change', (e) => {
                 const target = e.target;
                 if (target && target instanceof HTMLInputElement) {
                     const type = target.name;
                     const value = target.value;
-                    const checked = target.checked;                    
+                    const checked = target.checked;
                     if (type === FilterCheckboxType.BRAND || type === FilterCheckboxType.CATEGORY) {
                         if (!checked) {
                             const index = this.filter[type].findIndex((item) => item === value);
                             if (index !== -1) {
-                                this.filter[type] = [...this.filter[type].slice(0, index),...this.filter[type].slice(index + 1)];
+                                this.filter[type] = [
+                                    ...this.filter[type].slice(0, index),
+                                    ...this.filter[type].slice(index + 1),
+                                ];
                             } else {
                                 this.filter[type].push(value);
                             }
@@ -356,37 +366,41 @@ export class MainController extends Controller {
                         }
                     }
                     this.filterProducts();
-                }             
-            })
+                }
+            });
         });
     }
     renderFilterList(arr: string[], root: Element, type: FilterCheckboxType) {
         const list = root.querySelector('.filter-item__list');
         if (list) {
-            list.innerHTML = ''
+            list.innerHTML = '';
             const fragment = new DocumentFragment();
             arr.forEach((item) => {
-                const li = document.createElement('li');                
-                const checkboxItem = new Checkbox({
-                    value: item,
-                    name:type.toString(),
-                    label: item,
-                    checked: this.filter[type].includes(item),
-                    disabled: this.filteredProducts.findIndex((pr) => {
-                        if (type === FilterCheckboxType.BRAND) {
-                            return pr.brand === item
-                        }
-                        if (type === FilterCheckboxType.CATEGORY) {
-                            return pr.category === item
-                        }
-                    }) === -1
-                }, {
-                    selector: li,
-                    template: ''
-                });
+                const li = document.createElement('li');
+                const checkboxItem = new Checkbox(
+                    {
+                        value: item,
+                        name: type.toString(),
+                        label: item,
+                        checked: this.filter[type].includes(item),
+                        disabled:
+                            this.filteredProducts.findIndex((pr) => {
+                                if (type === FilterCheckboxType.BRAND) {
+                                    return pr.brand === item;
+                                }
+                                if (type === FilterCheckboxType.CATEGORY) {
+                                    return pr.category === item;
+                                }
+                            }) === -1,
+                    },
+                    {
+                        selector: li,
+                        template: '',
+                    }
+                );
                 fragment.append(li);
                 checkboxItem.render();
-            })
+            });
             list.innerHTML = '';
             list.append(fragment);
         }
@@ -398,21 +412,21 @@ export class MainController extends Controller {
         if (list && list instanceof HTMLElement) {
             if (option.value === ProductViewMode.LIST) {
                 list.classList.add('list');
-                this.setURLParams('view', option.value)
+                this.setURLParams('view', option.value);
             } else {
                 list.classList.remove('list');
-                this.setURLParams('view', '')
+                this.setURLParams('view', '');
             }
         }
     }
-    async getData(list: HTMLElement){
-            this.setLoading(list);
-            const data = await fetchProducts();
-            if (data.products && data.products.length > 0) {
-                this.products = data.products;
-                this.filteredProducts = data.products;
-                this.getFoundCount();
-            }
+    async getData(list: HTMLElement) {
+        this.setLoading(list);
+        const data = await fetchProducts();
+        if (data.products && data.products.length > 0) {
+            this.products = data.products;
+            this.filteredProducts = data.products;
+            this.getFoundCount();
+        }
     }
     setLoading(root: HTMLElement) {
         if (root) {
@@ -428,16 +442,16 @@ export class MainController extends Controller {
         }
     }
     onSortClickHandler(select: Select, option: Option): void {
-        select.changeSelection(option);        
+        select.changeSelection(option);
         if (JSON.stringify(option) !== JSON.stringify(this.selected)) {
             this.setURLParams('sort', option.value);
-            this.setURLParams('order', option.order!== undefined ? option.order.toString() : '');
+            this.setURLParams('order', option.order !== undefined ? option.order.toString() : '');
         }
         const list = document.querySelector('.main__products-list');
 
         if (list && list instanceof HTMLElement) {
-            this.setLoading(list);            
-            switch(option.value) {
+            this.setLoading(list);
+            switch (option.value) {
                 case 'price': {
                     if (option.order === OrderSort.ASC) {
                         this.filteredProducts = this.filteredProducts.sort((a, b) => a.price - b.price);

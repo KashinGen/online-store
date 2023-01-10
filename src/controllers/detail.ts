@@ -1,6 +1,6 @@
-import { getProduct } from "../api";
-import Loader from "../components/Loader";
-import { CartItem, Controller, Product } from "../types";
+import { getProduct } from '../api';
+import Loader from '../components/Loader';
+import { CartItem, Controller, Product } from '../types';
 
 export class DetailController extends Controller {
     product: Product | null = null;
@@ -8,9 +8,9 @@ export class DetailController extends Controller {
 
     init() {
         const path = window.location.pathname.split('?')[0];
-        const paths = path.split('/')
+        const paths = path.split('/');
         const id = paths[paths.length - 1];
-        this.getProductInfo(id)
+        this.getProductInfo(id);
     }
 
     async getProductInfo(id: string) {
@@ -26,7 +26,7 @@ export class DetailController extends Controller {
                 root.append(divNotFound);
             } else {
                 this.product = data;
-                root.innerHTML = ''
+                root.innerHTML = '';
                 this.renderBreadCrumb(root);
                 this.renderProduct(root);
             }
@@ -60,8 +60,8 @@ export class DetailController extends Controller {
                     target="_blank" 
                     href="/?q=${this.product?.title}"
                 >${this.product?.title}</a>
-            </li>`
-            root.appendChild(breadCrumb);
+            </li>`;
+        root.appendChild(breadCrumb);
     }
 
     renderProduct(root: HTMLElement) {
@@ -81,10 +81,10 @@ export class DetailController extends Controller {
             const slidesWrapper = document.createElement('div');
             slidesWrapper.className = 'product__slides';
             for (let i = 0; i < this.product.images.length; i += 1) {
-                const imgPath = this.product.images[i];                
+                const imgPath = this.product.images[i];
                 if (!imgPath.includes('thumbnail')) {
                     const slide = document.createElement('div');
-                    slide.className = 'product__slide'
+                    slide.className = 'product__slide';
                     const imgSlide = document.createElement('img');
                     imgSlide.setAttribute('alt', this.product.title);
                     imgSlide.src = imgPath;
@@ -94,7 +94,7 @@ export class DetailController extends Controller {
                     slide.appendChild(imgSlide);
                     slidesWrapper.appendChild(slide);
                     imgSlide.addEventListener('click', (e) => {
-                        const target = e.target
+                        const target = e.target;
                         if (target instanceof HTMLImageElement) {
                             const src = target.getAttribute('src');
                             const prevActiveSlide = document.querySelector('.product__slide.active');
@@ -107,7 +107,7 @@ export class DetailController extends Controller {
                                 bigImage.src = src;
                             }
                         }
-                    })
+                    });
                 }
             }
             leftContainer.appendChild(slidesWrapper);
@@ -126,7 +126,7 @@ export class DetailController extends Controller {
                 <div class="product-card__rating ${this.product.rating >= 4.5 ? 'blue' : ''}">
                     <span class='product-card__rating-star'></span>
                     <span class='product-card__rating-number'>${this.product.rating.toFixed(1)}</span>
-                </div>`
+                </div>`;
             rightContainer.append(ratingContainer);
             const charact = document.createElement('div');
             charact.className = 'product__characteristics';
@@ -147,16 +147,16 @@ export class DetailController extends Controller {
                         <span></span>
                         <span>${this.product.stock} шт.</span>
                     </li>
-            </ul>`
+            </ul>`;
             rightContainer.append(charact);
-            const descriptionContainer = document.createElement("div");
+            const descriptionContainer = document.createElement('div');
             descriptionContainer.className = 'product__description';
             descriptionContainer.innerHTML = `
                 <h3 class="product__description-title">Описание</h3>
                 <div class="product__description-block">${this.product.description}</div>
-            `
+            `;
             rightContainer.append(descriptionContainer);
-            const controlsContainer = document.createElement("div");
+            const controlsContainer = document.createElement('div');
             controlsContainer.className = 'product__controls';
             const price = document.createElement('div');
             price.className = 'product__price';
@@ -164,9 +164,7 @@ export class DetailController extends Controller {
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'product__buttons';
             const btnBuyOneClick = document.createElement('button');
-            btnBuyOneClick.addEventListener('click', () => {
-
-            });
+            btnBuyOneClick.addEventListener('click', () => {});
             btnBuyOneClick.innerHTML = 'Купить в 1 клик';
             const cartJSON = localStorage.getItem('cart');
             const cart = cartJSON ? JSON.parse(cartJSON) : [];
@@ -209,7 +207,7 @@ export class DetailController extends Controller {
                         cart_icon.classList.add('on');
                     }
                 }
-            })
+            });
             btnAddToCart.innerHTML = isInCart ? 'В корзине' : 'В корзину';
             buttonsContainer.append(btnBuyOneClick, btnAddToCart);
             controlsContainer.append(price, buttonsContainer);
@@ -218,7 +216,7 @@ export class DetailController extends Controller {
         }
         root.append(wrapper);
     }
-    
+
     setLoading(root: HTMLElement) {
         if (root) {
             const loaderWrapper = document.createElement('div');

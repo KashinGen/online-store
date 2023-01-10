@@ -29,7 +29,8 @@ class Select extends Component {
                             return `<li data-value=${JSON.stringify({ value: option.value, order: option.order })}>${
                                 option.label
                             }</li>`;
-                        }).join('')}
+                        })
+                        .join('')}
                 </ul>
             </div>`;
         super.render();

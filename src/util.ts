@@ -1,6 +1,6 @@
 export function debounce<F extends (...params: Event[]) => void>(fn: F, delay: number) {
     let timeoutID: number | null = null;
-    return function (this: Object, ...args: any[]) {
+    return function (this: Object, ...args: Event[]) {
         if (timeoutID) {
             clearTimeout(timeoutID);
         }

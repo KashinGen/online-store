@@ -67,4 +67,3 @@ export interface Filter {
     price: [number, number];
     stock: [number, number];
 }
-
