@@ -1,6 +1,7 @@
 import { URLRoute } from './types';
 import { MainController } from '../controllers/main';
 import { DetailController } from '../controllers/detail';
+import { CartController } from '../controllers/new-cart';
 const templateMain = require('../pages/main.html').default;
 const template404 = require('../pages/404.html').default;
 const templateCart = require('../pages/cart.html').default;
@@ -23,7 +24,7 @@ const routes: URLRoute = {
         template: templateCart,
         title: 'Корзина',
         description: 'Твоя корзиночка',
-        controller: new MainController(),
+        controller: new CartController(),
     },
     '/detail': {
         template: templateDetail,
@@ -61,7 +62,6 @@ const urlRoute = (e: Event) => {
 
 const urlLocationHandler = async () => {
     let location = window.location.pathname;
-    console.log(location);
     if (location.length === 0) {
         location = '/';
     }
@@ -69,7 +69,6 @@ const urlLocationHandler = async () => {
         location = '/detail';
     }
     const route = routes[location] || routes[404];
-    console.log(route.template);
     const html = route.template;
     const root = document.getElementById('app');
     if (root) {

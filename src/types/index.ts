@@ -67,3 +67,8 @@ export interface Filter {
     price: [number, number];
     stock: [number, number];
 }
+
+export enum CartAction {
+    INCREASE,
+    DECREASE,
+}
