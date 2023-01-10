@@ -19,7 +19,7 @@ export class CartController extends Controller {
     }
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
-        this.allPages = Math.ceil(this.cart.length / this.limit);    
+        this.allPages = Math.ceil(this.cart.length / this.limit); 
     }
     render() {
         const root = document.querySelector('.cart__inner');
@@ -66,8 +66,8 @@ export class CartController extends Controller {
         limitInput.className = 'cart__limit-number';
         limitInput.type = 'number';
         limitInput.min = '1';
-        limitInput.max = this.allPages.toString();
-        limitInput.value = this.currentPage.toString();
+        limitInput.max = this.cart.length.toString();
+        limitInput.value = this.limit.toString();
         limitInput.addEventListener('input', (e) => {
             const target = e.target;
             if (target instanceof HTMLInputElement) {
@@ -81,47 +81,70 @@ export class CartController extends Controller {
                 } else {
                     this.limit = + value;
                 }
+                let leftContainer = document.querySelector('.cart__left');                this.getCartToShow();
+                this.getCartToShow();
+                if (leftContainer instanceof HTMLElement) {
+                    this.renderCartItems(leftContainer);
+                }
+                this.currentPage = 1;
+                const currentPage = document.querySelector('.cart__pagination-wrapper span');
+                if (currentPage) {
+                    currentPage.innerHTML = this.currentPage.toString();
+                }
             }
         });
         limit.append(limitSpan, limitInput);
         // блок пагинации
         const pagination = document.createElement('div');
         pagination.className = 'cart__pagination';
+        const paginationWrapper = document.createElement('div')
+        paginationWrapper.className = 'cart__pagination-wrapper';
+        const paginationSpan = document.createElement('span');
+        paginationSpan.innerHTML = 'Страница: ';
         const btnPrev = document.createElement('button');
-        btnPrev.textContent = '&lt;';
+        btnPrev.innerHTML = '&lt;';
         btnPrev.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target instanceof HTMLButtonElement) {
-                if (+target.value < 0) {
-                    target.value = '1';
-                    this.currentPage = 1;
-                } else {
-                    this.currentPage = +target.value;
+            if (e.target && e.target instanceof HTMLButtonElement) {
+                if (this.currentPage === 1) return;
+                this.currentPage -= 1;              
+                this.getCartToShow();
+                const currentPage = document.querySelector('.cart__pagination-wrapper span');
+                if (currentPage) {
+                    currentPage.innerHTML = this.currentPage.toString();
+                }
+                let leftContainer = document.querySelector('.cart__left');
+                if (leftContainer instanceof HTMLElement) {
+                    this.renderCartItems(leftContainer);
                 }
             }
         });
         const btnNext = document.createElement('button');
-        btnNext.textContent = '&gt;';
+        btnNext.innerHTML = '&gt;';
         btnNext.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target instanceof HTMLButtonElement) {
-                if (+target.value > this.allPages) {
-                    target.value = this.allPages.toString();
-                    this.currentPage = this.allPages;
-                } else {
-                    this.currentPage = +target.value;
+            if (e.target instanceof HTMLButtonElement) { 
+                if (this.currentPage === this.allPages) {
+                    return;
+                } 
+                this.currentPage += 1;
+
+                this.getCartToShow();
+                console.log(this.currentPage);
+                let leftContainer = document.querySelector('.cart__left');
+                const currentPage = document.querySelector('.cart__pagination-wrapper span');
+                if (currentPage) {
+                    currentPage.innerHTML = this.currentPage.toString();
+                }
+                if (leftContainer instanceof HTMLElement) {
+                    this.renderCartItems(leftContainer);
                 }
             }
         });
         const currentPage = document.createElement('span');
         currentPage.innerHTML = this.currentPage.toString();
-        pagination.append(btnPrev, currentPage, btnNext);
-
+        paginationWrapper.append(btnPrev, currentPage, btnNext);
+        pagination.append(paginationSpan, paginationWrapper);
         controlsContainer.append(limit, pagination);
-
         cart_controls.append(title, controlsContainer);
-        console.log(cart_controls);
-        
         root.append(cart_controls);
     }
     renderCartItems(root: HTMLElement) {
@@ -130,6 +153,8 @@ export class CartController extends Controller {
             cart_list = document.createElement('div');
             cart_list.className = 'cart__list';
         }
+        console.log('render');
+        
         cart_list.innerHTML = '';
         this.cartToShow.forEach((cart_item) => {
             const cartItem = document.createElement('div');

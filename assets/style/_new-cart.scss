@@ -5,12 +5,75 @@
     &__inner {
         display: flex;
     }
-    &__list {
+    &__left {
         flex: 1;
+
+    }
+    &__list {
         
         gap: 15px;
         display: flex;
         flex-wrap: wrap;
+    }
+    &__controls {
+        display: flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom: 20px;
+        &-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 20px;
+        }
+    }
+    &__limit {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        input {
+            border: 1px solid #cfcfcf;
+            border-radius: 6px;
+            background-color: #fff;
+            font-size: 16px;
+            line-height: 19px;
+            border-radius: 6px;
+            padding: 6px 12px;
+            outline: none;
+        }
+    }
+    &__pagination {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        &-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                background-color: $main;
+                font-size: 16px;
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                transition: all .4s;
+                &:active {
+                    background-color:$hover-color
+                }
+            };
+        }
+    }
+    &__title {
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 125%;
     }
     &__info {
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
@@ -209,6 +272,9 @@
     .cart {
         &__btn-container button:hover {
             background-color: $hover-color;
+        }
+        &__pagination button:hover {
+                background-color:$hover-color
         }
     }
     .cart-item {
