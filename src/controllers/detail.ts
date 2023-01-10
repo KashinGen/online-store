@@ -212,7 +212,7 @@ export class DetailController extends Controller {
             buttonsContainer.append(btnBuyOneClick, btnAddToCart);
             controlsContainer.append(price, buttonsContainer);
             rightContainer.append(controlsContainer);
-            wrapper.appendChild(rightContainer);
+            wrapper.append(rightContainer);
         }
         root.append(wrapper);
     }
