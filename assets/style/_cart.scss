@@ -1,9 +1,7 @@
 .conteiner{
-    width:100%;
     max-width: 1460px;
     padding: 0 30px;
     margin: 0 auto;
-   
 }
 .wrapper{
     display: grid;
@@ -89,6 +87,7 @@
  }
 
  .promocode{
+    text-align: center;
     height: 2rem;
     border: 1px solid;
     border-radius: 50px;
@@ -119,4 +118,69 @@
 .minus:hover{
     background-color: tomato;
     cursor:pointer;
+}
+.Sorry{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.add-promo{
+    border: 1 px solid black;
+     border-radius: 10px;
+     margin-left: 20px;
+}
+.overflow{
+    position:fixed;
+    z-index: 2;
+    background: rgb(0 0 0 / 80%);
+    height: 100vh;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+.overflow h2 {
+    color: #fff;
+}
+.main-buy-now{
+    text-align: -webkit-center;
+    margin: 0 auto;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.main-buy-now input{
+    width: 200px;
+    border: 1px solid black;
+    border-radius: 15px;
+    height: 20px;
+    padding-left: 15px;
+}
+.error{
+    color: red;
+    position: absolute;
+    
+}
+.type-card{
+    position: absolute;
+    right: 230px;
+    color:peru;
+}
+.credit-catd{
+    position: relative;
+}
+.bth-submit{
+    margin-top: 20px;
+    border: 1px solid black;
+    cursor: pointer;
+    border-radius: 10px;
+    background-color: darkgoldenrod;
+    height: 40px;
+    width: 80px;
+}
+.bth-drop{
+    margin-left: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
 }
