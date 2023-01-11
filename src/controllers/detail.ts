@@ -1,6 +1,8 @@
 import { getProduct } from '../api';
 import Loader from '../components/Loader';
+import router from '../router';
 import { CartItem, Controller, Product } from '../types';
+import { getCart, updateCartInfo } from '../util';
 
 export class DetailController extends Controller {
     product: Product | null = null;
@@ -36,6 +38,10 @@ export class DetailController extends Controller {
     renderBreadCrumb(root: HTMLElement) {
         const breadCrumb = document.createElement('ul');
         breadCrumb.className = 'breadcrumb';
+        let brand = this.product?.brand;
+        if (this.product && this.product.brand) {
+            brand = encodeURIComponent(this.product?.brand);
+        }
         breadCrumb.innerHTML = `
             <li class="breadcrumb__item">
                 <a  class="breadcrumb__link router-link"
@@ -52,7 +58,7 @@ export class DetailController extends Controller {
             <li class="breadcrumb__item">
                 <a  class="breadcrumb__link router-link"
                     target="_blank" 
-                    href="/?brands=${this.product?.brand}"
+                    href="/?brands=${brand}"
                 >${this.product?.brand}</a>
             </li>
             <li class="breadcrumb__item breadcrumb__item--last">
@@ -164,49 +170,22 @@ export class DetailController extends Controller {
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'product__buttons';
             const btnBuyOneClick = document.createElement('button');
-            btnBuyOneClick.addEventListener('click', () => {});
-            btnBuyOneClick.innerHTML = 'Купить в 1 клик';
-            const cartJSON = localStorage.getItem('cart');
-            const cart = cartJSON ? JSON.parse(cartJSON) : [];
+            const cart = getCart();
             const index = cart.findIndex((item: CartItem) => item.product.id === this.product?.id);
             const isInCart = index !== -1;
-            const btnAddToCart = document.createElement('button');
-            btnAddToCart.addEventListener('click', (e) => {
+            btnBuyOneClick.addEventListener('click', (e) => {
                 const target = e.target;
-                if (index !== -1) {
-                    if (cart[index].product.stock > cart[index].count + 1) {
-                        cart[index].count++;
-                    }
-                } else {
-                    cart.push({
-                        product: this.product,
-                        count: 1,
-                    });
-                    if (target instanceof HTMLButtonElement) {
-                        target.innerHTML = 'В корзине';
-                    }
-                }
-                localStorage.setItem('cart', JSON.stringify(cart));
-                const cart_sum = document.querySelector('.header__cart-info-count span');
-                const { sum, count } = cart.reduce(
-                    (acc: { count: number; sum: number }, cartItem: CartItem) => {
-                        acc.sum += cartItem.product.price * cartItem.count;
-                        acc.count += cartItem.count;
-                        return acc;
-                    },
-                    { count: 0, sum: 0 }
-                );
-
-                if (cart_sum) {
-                    cart_sum.innerHTML = sum;
-                }
-                const cart_icon = document.querySelector('.header__cart-link');
-                if (cart_icon) {
-                    cart_icon.setAttribute('data-count', count);
-                    if (count > 0) {
-                        cart_icon.classList.add('on');
-                    }
-                }
+                if (!target) return;
+                if (isInCart) return;
+                this.addToCart(cart, index);
+                localStorage.setItem('buy-one-click', 'true');
+                router.push('/cart');
+            });
+            btnBuyOneClick.innerHTML = 'Купить в 1 клик';
+            const btnAddToCart = document.createElement('button');
+            btnAddToCart.className = 'btn-add-cart';
+            btnAddToCart.addEventListener('click', (e) => {
+                this.addToCart(cart, index);
             });
             btnAddToCart.innerHTML = isInCart ? 'В корзине' : 'В корзину';
             buttonsContainer.append(btnBuyOneClick, btnAddToCart);
@@ -229,5 +208,24 @@ export class DetailController extends Controller {
             root.append(loaderWrapper);
             loader.render();
         }
+    }
+    addToCart(cart: CartItem[], index: number) {
+        if (index !== -1) {
+            if (cart[index].product.stock > cart[index].count + 1) {
+                cart[index].count++;
+            }
+        } else {
+            if (!this.product) return;
+            cart.push({
+                product: this.product,
+                count: 1,
+            });
+            const btnToCart = document.querySelector('.btn-add-cart');
+            if (btnToCart) {
+                btnToCart.innerHTML = 'В корзине';
+            }
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartInfo();
     }
 }

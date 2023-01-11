@@ -71,7 +71,7 @@ class ProductList extends Component {
                 productComponent.render();
                 card.onclick = (e) => {
                     const target = e.target;
-                    if (target instanceof HTMLElement) {
+                    if (target instanceof HTMLButtonElement) {
                         let c_event = new CustomEvent('build', {
                             detail: {
                                 index: index,
