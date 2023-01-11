@@ -36,6 +36,10 @@ export class DetailController extends Controller {
     renderBreadCrumb(root: HTMLElement) {
         const breadCrumb = document.createElement('ul');
         breadCrumb.className = 'breadcrumb';
+        let brand = this.product?.brand;
+        if (this.product && this.product.brand) {
+            brand = encodeURIComponent(this.product?.brand)
+        }
         breadCrumb.innerHTML = `
             <li class="breadcrumb__item">
                 <a  class="breadcrumb__link router-link"
@@ -52,7 +56,7 @@ export class DetailController extends Controller {
             <li class="breadcrumb__item">
                 <a  class="breadcrumb__link router-link"
                     target="_blank" 
-                    href="/?brands=${this.product?.brand}"
+                    href="/?brands=${brand}"
                 >${this.product?.brand}</a>
             </li>
             <li class="breadcrumb__item breadcrumb__item--last">
