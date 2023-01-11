@@ -11,7 +11,7 @@ class CartItemComponent extends Component {
         this.callback = callback;
     }
     render() {
-        this.template = `<a href="/detail/${this.cartItem.product.id}" target='_blank' class="router-link">
+        (this.template = `<a href="/detail/${this.cartItem.product.id}" target='_blank' class="router-link">
                             <div class='cart-item__img-wrapper'>
                                 <div class="cart-item__img" style="background: url('${
                                     this.cartItem.product.thumbnail
@@ -22,11 +22,15 @@ class CartItemComponent extends Component {
                             <div class="cart-item__reviews-container">
                                 <div class="cart-item__rating ${this.cartItem.product.rating >= 4.5 ? 'blue' : ''}">
                                     <span class='cart-item__rating-star'></span>
-                                    <span class='cart-item__rating-number'>${this.cartItem.product.rating.toFixed(1)}</span>
+                                    <span class='cart-item__rating-number'>${this.cartItem.product.rating.toFixed(
+                                        1
+                                    )}</span>
                                 </div>
                                 <div class="cart-item__price">${this.cartItem.product.price} €</div>
                             </div>
-                            <a href="/detail/${this.cartItem.product.id}" target='_blank' class="router-link cart-item__name">
+                            <a href="/detail/${
+                                this.cartItem.product.id
+                            }" target='_blank' class="router-link cart-item__name">
                                 ${this.cartItem.product.title}
                             </a>
                             <ul class="cart-item__info">
@@ -60,9 +64,9 @@ class CartItemComponent extends Component {
                                 <span> €
                             </div>
                         </div>
-                        `,
-        super.render();
-        this.selector.addEventListener('click',(e) => {
+                        `),
+            super.render();
+        this.selector.addEventListener('click', (e) => {
             const target = e.target;
             if (target instanceof HTMLButtonElement) {
                 const content = target.textContent;
@@ -73,9 +77,9 @@ class CartItemComponent extends Component {
                 if (content && content === '-') {
                     this.callback(this, CartAction.DECREASE);
                     return;
-                }  
+                }
             }
-        })
+        });
     }
 }
 export default CartItemComponent;

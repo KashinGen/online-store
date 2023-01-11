@@ -150,23 +150,25 @@ export class MainController extends Controller {
             }
             this.filterProducts();
             this.renderProducts(list);
-            list.addEventListener('build', (e: CustomEventInit) => {
-                const detail = e.detail;
-                if (detail) {
-                    const {index, product} = detail;
-                    if (index !== -1) {
-                        if (this.cart[index].product.stock > this.cart[index].count + 1) {
-                            this.cart[index].count++;
+            list.addEventListener('build', (e) => {
+                if (e instanceof CustomEvent) {
+                    const detail = e.detail;
+                    if (detail) {
+                        const { index, product } = detail;
+                        if (index !== -1) {
+                            if (this.cart[index].product.stock > this.cart[index].count + 1) {
+                                this.cart[index].count++;
+                            }
+                        } else {
+                            this.cart.push({
+                                product: product,
+                                count: 1,
+                            });
                         }
-                    } else {
-                        this.cart.push({
-                            product: product,
-                            count: 1,
-                        });
+                        localStorage.setItem('cart', JSON.stringify(this.cart));
                     }
-                    localStorage.setItem('cart', JSON.stringify(this.cart));
                 }
-            })
+            });
         }
         if (this.search) {
             this.onSearchInputHandler(this.search);
@@ -179,7 +181,7 @@ export class MainController extends Controller {
                 stock: [...this.filterData.stock],
             };
             this.filterProducts();
-            this.renderFilter();            
+            this.renderFilter();
 
             const list = document.querySelector('.main__products-list');
             router.push('/');
@@ -203,7 +205,11 @@ export class MainController extends Controller {
         if (filterRoot instanceof HTMLElement) {
             filterRoot.addEventListener('checkBoxEvent', (e) => {
                 if (e instanceof CustomEvent) {
-                    const {value, checked, type}: {value: string, checked: boolean, type: FilterCheckboxType} = e.detail;
+                    const {
+                        value,
+                        checked,
+                        type,
+                    }: { value: string; checked: boolean; type: FilterCheckboxType } = e.detail;
                     if (type === FilterCheckboxType.BRAND || type === FilterCheckboxType.CATEGORY) {
                         if (checked) {
                             const index = this.filter[type].findIndex((item: string) => item === value);
@@ -217,45 +223,38 @@ export class MainController extends Controller {
                             }
                         } else {
                             this.filter[type].push(value);
-                        }                                                
+                        }
                         setURLParams(type, this.filter[type].join(''));
                     }
-                    this.renderFilter();            
+                    this.renderFilter();
                     this.filterProducts();
                 }
-        })
-        filterRoot.addEventListener('priceChanged', (e) => {
-            if (e instanceof CustomEvent) {
-                const value = e.detail.value;
-                if (value) {
-                    this.onPriceRangeHandler(value);
+            });
+            filterRoot.addEventListener('priceChanged', (e) => {
+                if (e instanceof CustomEvent) {
+                    const value = e.detail.value;
+                    if (value) {
+                        this.onPriceRangeHandler(value);
+                    }
                 }
-
-            }
-        });
-        filterRoot.addEventListener('stockChanged', (e) => {
-            if (e instanceof CustomEvent) {
-                const value = e.detail.value;
-                if (value) {
-                    this.onStockRangeHandler(value);
+            });
+            filterRoot.addEventListener('stockChanged', (e) => {
+                if (e instanceof CustomEvent) {
+                    const value = e.detail.value;
+                    if (value) {
+                        this.onStockRangeHandler(value);
+                    }
                 }
-
-            }
-        });
-    }
+            });
+        }
     }
     renderFilter() {
         const filterRoot = document.querySelector('.main__filter');
         if (filterRoot instanceof HTMLElement) {
-            const filter = new FilterComponent(
-                this.filterData,
-                this.filter,
-                this.filteredProducts,
-                {
-                    selector: filterRoot,
-                    template: ''
-                }
-            );
+            const filter = new FilterComponent(this.filterData, this.filter, this.filteredProducts, {
+                selector: filterRoot,
+                template: '',
+            });
             filter.render();
         }
     }
@@ -385,8 +384,6 @@ export class MainController extends Controller {
         this.renderFilter();
     }
 
-
-
     onChangeViewHandler(select: Select, option: Option): void {
         select.changeSelection(option);
         const list = document.querySelector('.main__products-list');
@@ -457,8 +454,8 @@ export class MainController extends Controller {
     renderProducts(root: HTMLElement) {
         const list = new ProductList({
             selector: root,
-            template: ''
-        })
+            template: '',
+        });
         list.render();
         list.renderProduct(this.filteredProducts, this.cart);
     }

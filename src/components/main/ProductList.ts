@@ -14,7 +14,7 @@ class ProductList extends Component {
     }
 
     renderProduct(list: Product[], cart: CartItem[]) {
-       this.selector.innerHTML = '';
+        this.selector.innerHTML = '';
         if (list.length !== 0) {
             const fragment = new DocumentFragment();
             list.forEach((product) => {
@@ -72,12 +72,13 @@ class ProductList extends Component {
                 card.onclick = (e) => {
                     const target = e.target;
                     if (target instanceof HTMLElement) {
-                        let c_event = new CustomEvent("build",{detail: {
-                            index: index,
-                            product: product,
-                        }});
+                        let c_event = new CustomEvent('build', {
+                            detail: {
+                                index: index,
+                                product: product,
+                            },
+                        });
                         this.selector.dispatchEvent(c_event);
-                        
                         const btn = target.closest('.product-card__add-btn');
                         if (btn) {
                             if (index === -1) {
@@ -90,7 +91,7 @@ class ProductList extends Component {
                             updateCartInfo();
                         }
                     }
-                }
+                };
             });
             this.selector.innerHTML = '';
             this.selector.append(fragment);

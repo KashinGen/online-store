@@ -1,7 +1,6 @@
-
 import CartItemComponent from '../components/CartItem';
 import { CartAction, CartItem, Controller, Promo } from '../types';
-import { getCart, setURLParams, updateCartInfo } from '../util';
+import { enforceFormat, formatToPhone, getCart, setURLParams, updateCartInfo } from '../util';
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
@@ -16,16 +15,17 @@ export class CartController extends Controller {
         {
             percents: 20,
             label: 'RS School',
-            code: 'RS'
+            code: 'RS',
         },
         {
             percents: 10,
             label: 'КупиЧоХошь',
-            code: 'КупиЧоХошь'
-        }
-    ]
-    init() {        
-        this.cart =  getCart();
+            code: 'КупиЧоХошь',
+        },
+    ];
+
+    init() {
+        this.cart = getCart();
         const { sum, count } = updateCartInfo();
         this.sum = sum;
         this.count = count;
@@ -33,7 +33,7 @@ export class CartController extends Controller {
         this.currentPage = 1;
         this.allPages = 1;
         this.getCartToShow();
-        this.getURLParams();        
+        this.getURLParams();
         this.render();
         this.addedPromo = [];
     }
@@ -57,10 +57,12 @@ export class CartController extends Controller {
         }
         this.getCartToShow();
     }
+
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
-        this.allPages = Math.ceil(this.cart.length / this.limit);        
+        this.allPages = Math.ceil(this.cart.length / this.limit);
     }
+
     openModal() {
         const blockCreditCard: string = `
         <div>
@@ -91,13 +93,13 @@ export class CartController extends Controller {
         const adress: HTMLInputElement | null = document.querySelector('.adress');
         const email: HTMLInputElement | null = document.querySelector('.mail');
         const cardnumber: HTMLInputElement | null = document.querySelector('.cardnumber');
-        const cardData: HTMLInputElement | null = document.querySelector('.valid');       
+        const cardData: HTMLInputElement | null = document.querySelector('.valid');
         const typeCard: HTMLSpanElement | null = document.querySelector('.type-card');
         const cvv: HTMLInputElement | null = document.querySelector('.cvv');
         if (name instanceof HTMLInputElement) {
             name.addEventListener('input', (e) => {
                 if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value).split(' ');
+                    const str = e.target.value.split(' ');
                     const errorName = document.querySelector('.error-name');
                     if (!errorName) return;
                     if (str) {
@@ -107,33 +109,18 @@ export class CartController extends Controller {
                             errorName.innerHTML = '';
                         }
                     }
-                } 
+                }
             });
         }
         if (phone instanceof HTMLInputElement) {
-            phone.addEventListener('input', (e) => {
-                if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value).split('');
-                    const errorPhone = document.querySelector('.error-phone');
-                    if (!errorPhone) return;
-                    if (str) {
-                        if (isNaN!(+e.target.value.slice(1))) {
-                            e.target.value = str.slice(0, str.length - 1).join('');
-                        }
-                        if (str.length < 9 && isNaN(+e.target.value[0])) {
-                            errorPhone.innerHTML = 'ERROR';
-                        } else {
-                            errorPhone.innerHTML = '';
-                        }
-                    }
-                } 
-            });
+            phone.addEventListener('keydown', enforceFormat);
+            phone.addEventListener('keyup', formatToPhone);
         }
         if (adress instanceof HTMLInputElement) {
             adress.addEventListener('input', (e) => {
                 if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value).trim().split(' ');
-                    const errorAddress = document.querySelector('.error-adress')
+                    const str = e.target.value.trim().split(' ');
+                    const errorAddress = document.querySelector('.error-adress');
                     if (!errorAddress) return;
                     if (str) {
                         const isTrue = str.every((el) => el.length > 2);
@@ -143,13 +130,13 @@ export class CartController extends Controller {
                             errorAddress.innerHTML = '';
                         }
                     }
-                } 
+                }
             });
         }
         if (email instanceof HTMLInputElement) {
             email.addEventListener('input', (e) => {
                 if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value);
+                    const str = e.target.value;
                     const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
                     const errorEmail = document.querySelector('.error-mail');
                     if (!errorEmail) return;
@@ -160,13 +147,13 @@ export class CartController extends Controller {
                             errorEmail.innerHTML = 'ERROR';
                         }
                     }
-                } 
+                }
             });
         }
         if (cardnumber instanceof HTMLInputElement) {
             cardnumber.addEventListener('input', (e) => {
                 if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value).split('');
+                    const str = e.target.value.split('');
                     const errorCard = document.querySelector('.error-card');
                     if (!errorCard) return;
                     if (typeCard && str) {
@@ -193,13 +180,13 @@ export class CartController extends Controller {
                             errorCard.innerHTML = '';
                         }
                     }
-                } 
+                }
             });
         }
         if (cardData instanceof HTMLInputElement) {
             cardData.addEventListener('input', (e) => {
                 if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value);
+                    const str = e.target.value;
                     const errorCardData = document.querySelector('.error-valid');
                     if (!errorCardData) return;
                     if (str) {
@@ -219,18 +206,21 @@ export class CartController extends Controller {
                             errorCardData.innerHTML = '';
                         }
                     }
-                } 
+                }
             });
         }
         if (cvv instanceof HTMLInputElement) {
             cvv.addEventListener('input', (e) => {
                 if (e.target instanceof HTMLInputElement) {
-                    const str = (e.target.value);
+                    const str = e.target.value;
                     const errorCode = document.querySelector('.error-code');
                     if (!errorCode) return;
                     if (str) {
                         if (isNaN!(+e.target.value.slice(1))) {
-                            e.target.value = str.split('').slice(0, str.length - 1).join('');
+                            e.target.value = str
+                                .split('')
+                                .slice(0, str.length - 1)
+                                .join('');
                         }
                         if (str.length < 3 || str.length > 3) {
                             errorCode.innerHTML = 'ERROR';
@@ -238,52 +228,56 @@ export class CartController extends Controller {
                             errorCode.innerHTML = '';
                         }
                     }
-                } 
+                }
             });
         }
-        const error: HTMLSpanElement | NodeList | null = document.querySelectorAll('.error')
+        const error: HTMLSpanElement | NodeList | null = document.querySelectorAll('.error');
         const bthSubmit: HTMLButtonElement | null = document.querySelector('.bth-submit');
         if (bthSubmit && error) {
             bthSubmit.addEventListener('click', () => {
                 const arrayResult: String[] = [];
                 if (name instanceof HTMLInputElement) {
                     arrayResult.push(name.value);
-                    }
+                }
                 if (phone instanceof HTMLInputElement) {
                     arrayResult.push(phone.value);
-                    }
+                }
                 if (adress instanceof HTMLInputElement) {
                     arrayResult.push(adress.value);
-                    }
+                }
                 if (email instanceof HTMLInputElement) {
                     arrayResult.push(email.value);
-                    }
+                }
                 if (cardnumber instanceof HTMLInputElement) {
                     arrayResult.push(cardnumber.value);
-                    }
+                }
                 if (cardData instanceof HTMLInputElement) {
                     arrayResult.push(cardData.value);
-                    }
+                }
                 if (cvv instanceof HTMLInputElement) {
                     arrayResult.push(cvv.value);
-                    }
+                }
                 const errorArray: String[] = [];
                 error.forEach((el) => {
-                    if (el.textContent !== null){
-                    errorArray.push(el.textContent)}
-                })
+                    if (el.textContent !== null) {
+                        errorArray.push(el.textContent);
+                    }
+                });
                 let isError = errorArray.every((el) => {
                     return el.toString() !== 'ERROR';
-                })
-                if (arrayResult.every((el) => {
-                     return el.length > 2
-                    }) && isError) {
+                });
+                if (
+                    arrayResult.every((el) => {
+                        return el.length > 2;
+                    }) &&
+                    isError
+                ) {
                     alert('Ваш заказ принят');
                     document.querySelector('.overflow')?.remove();
                     localStorage.removeItem('cart');
                 }
             });
-        }       
+        }
     }
     render() {
         const root = document.querySelector('.cart__inner');
@@ -476,7 +470,7 @@ export class CartController extends Controller {
         completedPromo.className = 'cart__promo-completed';
         const title = document.createElement('div');
         title.className = 'cart__total-count';
-        title.innerHTML = 'Введенные промокоды:'
+        title.innerHTML = 'Введенные промокоды:';
         const list = document.createElement('ul');
         completedPromo.append(title, list);
         completedPromo.style.display = 'none';
@@ -491,10 +485,10 @@ export class CartController extends Controller {
             const target = e.target;
             if (target instanceof HTMLInputElement) {
                 const value = target.value;
-                    const index = this.promo.findIndex((promo) => promo.code === value);
-                    this.renderFoundPromo(this.promo[index] ? this.promo[index] : null);                    
+                const index = this.promo.findIndex((promo) => promo.code === value);
+                this.renderFoundPromo(this.promo[index] ? this.promo[index] : null);
             }
-        })
+        });
         const promoTestInfo = document.createElement('div');
         promoTestInfo.className = 'cart__promo-test';
         promoTestInfo.innerHTML = 'Коды для теста: RS, КупиЧоХошь';
@@ -534,7 +528,7 @@ export class CartController extends Controller {
                                 <span>${promo.label}</span>
                                 -
                                 <span>${promo.percents} %</span>
-                            </div>`
+                            </div>`;
         const item = this.addedPromo.find((item) => promo.code === item.code);
         if (!item) {
             const btnAdd = document.createElement('button');
@@ -562,43 +556,43 @@ export class CartController extends Controller {
         }
     }
     renderCompletedPromo() {
-            const root = document.querySelector('.cart__promo-completed');
-            if (root instanceof HTMLElement) {
-                root.style.display = this.addedPromo.length ? 'block' : 'none';
-            }
-            const list =  document.querySelector('.cart__promo-completed ul');
-            if (list) {
-                const fragment = new DocumentFragment();
-                this.addedPromo.forEach((promo) => {
-                    const li = document.createElement('li');
-                    li.className = 'promo-item';
-                    const content = document.createElement('div');
-                    content.innerHTML = `
+        const root = document.querySelector('.cart__promo-completed');
+        if (root instanceof HTMLElement) {
+            root.style.display = this.addedPromo.length ? 'block' : 'none';
+        }
+        const list = document.querySelector('.cart__promo-completed ul');
+        if (list) {
+            const fragment = new DocumentFragment();
+            this.addedPromo.forEach((promo) => {
+                const li = document.createElement('li');
+                li.className = 'promo-item';
+                const content = document.createElement('div');
+                content.innerHTML = `
                                         <span>${promo.label}</span>
                                         -
-                                        <span>${promo.percents} %</span>`
-                    const btnDelete = document.createElement('button');
-                    btnDelete.innerHTML = '-';
-                    btnDelete.addEventListener('click', (e) => {
-                        const index = this.addedPromo.findIndex((item) => item.code === promo.code);
-                        if (index !== -1) {
-                            this.addedPromo = [...this.addedPromo.slice(0, index), ...this.addedPromo.slice(index + 1)];
-                            this.renderCompletedPromo();
-                            this.renderFoundPromo(null);
-                            this.setSale();
-                        }
-                    });
-                    li.append(content, btnDelete);
-                    fragment.append(li);
+                                        <span>${promo.percents} %</span>`;
+                const btnDelete = document.createElement('button');
+                btnDelete.innerHTML = '-';
+                btnDelete.addEventListener('click', (e) => {
+                    const index = this.addedPromo.findIndex((item) => item.code === promo.code);
+                    if (index !== -1) {
+                        this.addedPromo = [...this.addedPromo.slice(0, index), ...this.addedPromo.slice(index + 1)];
+                        this.renderCompletedPromo();
+                        this.renderFoundPromo(null);
+                        this.setSale();
+                    }
                 });
-                list.innerHTML = '';
-                list.append(fragment);
-            }
+                li.append(content, btnDelete);
+                fragment.append(li);
+            });
+            list.innerHTML = '';
+            list.append(fragment);
+        }
     }
     setSale() {
         const sale = this.addedPromo.reduce((acc, item) => {
-            return acc += item.percents;
-        },0)        
+            return (acc += item.percents);
+        }, 0);
         const infoContainer = document.querySelector('.cart__info');
         if (infoContainer) {
             const oldPrice = infoContainer.querySelector('.cart__total-sum');
@@ -606,29 +600,31 @@ export class CartController extends Controller {
                 if (sale === 0) {
                     oldPrice.classList.remove('old');
                 } else {
-                    oldPrice.classList.add('old')
+                    oldPrice.classList.add('old');
                 }
                 let newPriceContainer = document.querySelector('.cart__total-sum--new');
                 if (!newPriceContainer && sale !== 0) {
                     newPriceContainer = document.createElement('div');
                     newPriceContainer.classList.add('cart__total-sum', 'cart__total-sum--new');
-                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${this.sum - this.sum * sale / 100}</span> €`;
-                    infoContainer.prepend(newPriceContainer);                                        
-                } 
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${
+                        this.sum - (this.sum * sale) / 100
+                    }</span> €`;
+                    infoContainer.prepend(newPriceContainer);
+                }
                 if (newPriceContainer) {
-                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${this.sum - this.sum * sale / 100}</span> €`;
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${
+                        this.sum - (this.sum * sale) / 100
+                    }</span> €`;
                     if (sale === 0) {
                         newPriceContainer.remove();
                         infoContainer.removeChild(newPriceContainer);
                     }
                 }
-  
-                
             }
         }
     }
     getSumAndCount() {
-        const {sum, count} = updateCartInfo();
+        const { sum, count } = updateCartInfo();
         this.sum = sum;
         this.count = count;
     }
