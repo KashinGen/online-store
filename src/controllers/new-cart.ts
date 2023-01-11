@@ -1,6 +1,7 @@
 
 import CartItemComponent from '../components/CartItem';
 import { CartAction, CartItem, Controller, Promo } from '../types';
+import { getCart, updateCartInfo } from '../util';
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
@@ -24,10 +25,10 @@ export class CartController extends Controller {
         }
     ]
     init() {        
-        const cartJSON = localStorage.getItem('cart');
-        this.cart = cartJSON ? JSON.parse(cartJSON) : [];
-        this.sum = 0;
-        this.count = 0;
+        this.cart =  getCart();
+        const { sum, count } = updateCartInfo();
+        this.sum = sum;
+        this.count = count;
         this.limit = 3;
         this.currentPage = 1;
         this.allPages = 1;
@@ -37,6 +38,14 @@ export class CartController extends Controller {
     }
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
+        console.log(this.cartToShow, 'show');
+        console.log(this.limit);
+        console.log(this.currentPage);
+        console.log(this.cart);
+        
+        
+        
+        
         this.allPages = Math.ceil(this.cart.length / this.limit);
     }
     openModal() {
@@ -52,7 +61,7 @@ export class CartController extends Controller {
             <div class='main-buy-now'>
             <h2>Personal details</h2>
             <form id="auth"  method="get" action="../../src/controllers/new-cart.ts">
-            <div><input placeholder="Name" name="name" type="text" class="name" oninput='this.value' value=''><span class='error error-name'></span></div>
+            <div><input placeholder="Name" class="detail__name" type="text" name="name"><span class='error error-name'></span></div>
             <div><input placeholder="PhoneNumber" name="phone" type="text"  class="phone"><span class='error error-phone'></span></div>
             <div><input placeholder="Adress" name="adress" type="text" class="adress"><span class='error error-adress'></span></div>
             <div><input placeholder="E-mail" name="email" type="email" min='000' max='999' class="mail"><span class='error error-mail'></span></div>
@@ -70,6 +79,7 @@ export class CartController extends Controller {
         }
         const phone: HTMLInputElement | null = document.querySelector('.phone');
         const cardData: HTMLInputElement | null = document.querySelector('.valid');
+                
         const typeCard: HTMLSpanElement | null = document.querySelector('.type-card');
         const formElement: HTMLFormElement | Element | null = document.getElementById('auth');
         if (formElement instanceof HTMLFormElement) {
@@ -284,7 +294,7 @@ export class CartController extends Controller {
                     this.limit = +value;
                 }
                 let leftContainer = document.querySelector('.cart__left');
-                this.getCartToShow();
+                this.currentPage = 1;
                 this.getCartToShow();
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
@@ -389,6 +399,8 @@ export class CartController extends Controller {
         }
         localStorage.setItem('cart', JSON.stringify(this.cart));
         this.render();
+        this.renderCompletedPromo();
+        this.setSale();
     }
     renderCartInfo(root: HTMLElement) {
         let cartInfo = document.querySelector('.cart__info');
@@ -433,7 +445,7 @@ export class CartController extends Controller {
         promoTestInfo.className = 'cart__promo-test';
         promoTestInfo.innerHTML = 'Коды для теста: RS, КупиЧоХошь';
         const foundPromo = document.createElement('div');
-        foundPromo.className = 'promo';
+        foundPromo.className = 'promo__list';
         const content = document.createElement('div');
         content.className = 'promo__found-list';
         foundPromo.append(content);
@@ -462,7 +474,7 @@ export class CartController extends Controller {
         root.innerHTML = '';
         if (!promo) return;
         const div = document.createElement('div');
-        div.className = 'promo';
+        div.className = 'promo-item';
         const content = document.createElement('div');
         content.innerHTML = `<div class="promo">
                                 <span>${promo.label}</span>
@@ -478,7 +490,12 @@ export class CartController extends Controller {
                 if (!isAdded) {
                     this.addedPromo.push(promo);
                     this.renderCompletedPromo();
-                    this.renderFoundPromo(promo);
+                    this.renderFoundPromo(null);
+                    const input = document.querySelector('.cart__promo-input');
+                    if (input instanceof HTMLInputElement) {
+                        input.value = '';
+                    }
+                    this.setSale();
                 }
             });
             div.append(content, btnAdd);
@@ -500,8 +517,8 @@ export class CartController extends Controller {
                 const fragment = new DocumentFragment();
                 this.addedPromo.forEach((promo) => {
                     const li = document.createElement('li');
+                    li.className = 'promo-item';
                     const content = document.createElement('div');
-                    content.className = 'promo';
                     content.innerHTML = `
                                         <span>${promo.label}</span>
                                         -
@@ -513,6 +530,8 @@ export class CartController extends Controller {
                         if (index !== -1) {
                             this.addedPromo = [...this.addedPromo.slice(0, index), ...this.addedPromo.slice(index + 1)];
                             this.renderCompletedPromo();
+                            this.renderFoundPromo(null);
+                            this.setSale();
                         }
                     });
                     li.append(content, btnDelete);
@@ -522,32 +541,43 @@ export class CartController extends Controller {
                 list.append(fragment);
             }
     }
-    getSumAndCount() {
-        const { sum, count } = this.cart.reduce(
-            (acc: { count: number; sum: number }, cartItem: CartItem) => {
-                acc.sum += cartItem.product.price * cartItem.count;
-                acc.count += cartItem.count;
-                return acc;
-            },
-            { count: 0, sum: 0 }
-        );
-        this.sum = sum ? sum : 0;
-        this.count = count ? count : 0;
-        const cart_sum = document.querySelector('.header__cart-info-count span');
-        if (cart_sum && cart_sum.innerHTML !== this.sum.toString()) {
-            cart_sum.innerHTML = this.sum.toString();
-        }
-        const cart_icon = document.querySelector('.header__cart-link');
-        if (cart_icon) {
-            const iconCount = cart_icon.getAttribute('data-count');
-            if (iconCount !== this.count.toString()) {
-                cart_icon.setAttribute('data-count', this.count.toString());
-                if (count > 0) {
-                    cart_icon.classList.add('on');
+    setSale() {
+        const sale = this.addedPromo.reduce((acc, item) => {
+            return acc += item.percents;
+        },0)        
+        const infoContainer = document.querySelector('.cart__info');
+        if (infoContainer) {
+            const oldPrice = infoContainer.querySelector('.cart__total-sum');
+            if (oldPrice instanceof HTMLElement) {
+                console.log('sum');
+
+                if (sale === 0) {
+                    oldPrice.classList.remove('old');
                 } else {
-                    cart_icon.classList.remove('on');
+                    oldPrice.classList.add('old')
                 }
+                let newPriceContainer = document.querySelector('.cart__total-sum--new');
+                if (!newPriceContainer && sale !== 0) {
+                    newPriceContainer = document.createElement('div');
+                    newPriceContainer.classList.add('cart__total-sum', 'cart__total-sum--new');
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${this.sum - this.sum * sale / 100}</span> €`;
+                    infoContainer.prepend(newPriceContainer);                                        
+                } 
+                if (newPriceContainer) {
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${this.sum - this.sum * sale / 100}</span> €`;
+                    if (sale === 0) {
+                        newPriceContainer.remove();
+                        infoContainer.removeChild(newPriceContainer);
+                    }
+                }
+  
+                
             }
         }
+    }
+    getSumAndCount() {
+        const {sum, count} = updateCartInfo();
+        this.sum = sum;
+        this.count = count;
     }
 }

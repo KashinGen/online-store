@@ -22,6 +22,8 @@ export function updateCartInfo() {
         },
         { count: 0, sum: 0 }
     );
+
+    
     if (cart_sum) {
         cart_sum.innerHTML = sum;
     }
