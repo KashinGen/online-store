@@ -7,19 +7,16 @@ class FilterComponent extends Component {
     filter: Filter;
     filterData: Filter;
     products: Product[] = [];
-    constructor(filterData: Filter,
-                filter: Filter,
-                products: Product[],
-                config: ConfigComponent
-                ) {
+    constructor(filterData: Filter, filter: Filter, products: Product[], config: ConfigComponent) {
         super(config);
         this.filter = filter;
         this.filterData = filterData;
         this.products = products;
     }
 
-    render() {        
-        const brandsFilterBlock = document.querySelector('.filter-item.brands');        
+    render() {
+        const doc = document.querySelectorAll('name');
+        const brandsFilterBlock = document.querySelector('.filter-item.brands');
         if (brandsFilterBlock) {
             this.renderFilterList(this.filterData.brands, brandsFilterBlock, FilterCheckboxType.BRAND);
         }
@@ -40,7 +37,7 @@ class FilterComponent extends Component {
                     template: '',
                 }
             );
-            slider.render();            
+            slider.render();
         }
         const stockFilterBlock = document.querySelector('.filter-item.stock .filter-item__content');
         if (stockFilterBlock && stockFilterBlock instanceof HTMLElement) {
@@ -94,15 +91,19 @@ class FilterComponent extends Component {
         }
     }
     onPriceChange(val: [number, number]) {
-        let c_event = new CustomEvent("priceChanged",{detail: {
-            value: val
-        }});
+        let c_event = new CustomEvent('priceChanged', {
+            detail: {
+                value: val,
+            },
+        });
         this.selector.dispatchEvent(c_event);
     }
     onStockChange(val: [number, number]) {
-        let c_event = new CustomEvent("stockChanged",{detail: {
-            value: val
-        }});
+        let c_event = new CustomEvent('stockChanged', {
+            detail: {
+                value: val,
+            },
+        });
         this.selector.dispatchEvent(c_event);
     }
 }

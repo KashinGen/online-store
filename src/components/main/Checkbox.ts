@@ -21,18 +21,19 @@ class Checkbox extends Component {
             </label>`;
         super.render();
         const input = this.selector.querySelector('input[type=checkbox]');
-        if (input instanceof HTMLInputElement)  {
+        if (input instanceof HTMLInputElement) {
             input.addEventListener('change', (e) => {
-                let c_event = new CustomEvent("checkBoxEvent",{detail: {
-                    value: this.props.value,
-                    checked: this.props.checked,
-                    type: this.props.name
-                }});
+                let c_event = new CustomEvent('checkBoxEvent', {
+                    detail: {
+                        value: this.props.value,
+                        checked: this.props.checked,
+                        type: this.props.name,
+                    },
+                });
                 const filterRoot = document.querySelector('.main__filter');
                 filterRoot?.dispatchEvent(c_event);
-            })
+            });
         }
-
     }
 }
 export default Checkbox;
