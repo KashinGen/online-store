@@ -1,6 +1,7 @@
 
 import CartItemComponent from '../components/CartItem';
 import { CartAction, CartItem, Controller, Promo } from '../types';
+import { getCart, setURLParams, updateCartInfo } from '../util';
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
@@ -14,7 +15,7 @@ export class CartController extends Controller {
     promo: Promo[] = [
         {
             percents: 20,
-            label: 'RS',
+            label: 'RS School',
             code: 'RS'
         },
         {
@@ -24,49 +25,42 @@ export class CartController extends Controller {
         }
     ]
     init() {        
-        const cartJSON = localStorage.getItem('cart');
-        this.cart = cartJSON ? JSON.parse(cartJSON) : [];
-        this.sum = 0;
-        this.count = 0;
+        this.cart =  getCart();
+        const { sum, count } = updateCartInfo();
+        this.sum = sum;
+        this.count = count;
         this.limit = 3;
         this.currentPage = 1;
         this.allPages = 1;
         this.getCartToShow();
+        this.getURLParams();        
         this.render();
         this.addedPromo = [];
     }
+    getURLParams(): void {
+        const searchParams = new URLSearchParams(window.location.search);
+        const limit = searchParams.get('limit');
+        const page = searchParams.get('page');
+        if (limit) {
+            const selectedLimit = +limit <= this.cart.length && +limit >= 1 ? +limit : this.cart.length;
+            this.limit = selectedLimit;
+        }
+        if (page) {
+            let selectedPage = +page;
+            if (selectedPage < 1) {
+                selectedPage = 1;
+            }
+            if (selectedPage > this.allPages) {
+                selectedPage = this.allPages;
+            }
+            this.currentPage = selectedPage;
+        }
+        this.getCartToShow();
+    }
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
-        this.allPages = Math.ceil(this.cart.length / this.limit);
+        this.allPages = Math.ceil(this.cart.length / this.limit);        
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     openModal() {
         const blockCreditCard: string = `
         <div>
@@ -98,6 +92,7 @@ export class CartController extends Controller {
         const email: HTMLInputElement | null = document.querySelector('.mail');
         const cardnumber: HTMLInputElement | null = document.querySelector('.cardnumber');
         const cardData: HTMLInputElement | null = document.querySelector('.valid');
+                
         const typeCard: HTMLSpanElement | null = document.querySelector('.type-card');
         const cvv: HTMLInputElement | null = document.querySelector('.cvv');
         if (name instanceof HTMLInputElement) {
@@ -254,30 +249,6 @@ export class CartController extends Controller {
             });
         }       
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     render() {
         const root = document.querySelector('.cart__inner');
         if (root instanceof HTMLElement) {
@@ -337,8 +308,10 @@ export class CartController extends Controller {
                     this.limit = +value;
                 }
                 let leftContainer = document.querySelector('.cart__left');
+                this.currentPage = 1;
                 this.getCartToShow();
-                this.getCartToShow();
+                setURLParams('page', this.currentPage.toString());
+                setURLParams('limit', this.limit.toString());
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
                 }
@@ -372,6 +345,7 @@ export class CartController extends Controller {
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
                 }
+                setURLParams('page', this.currentPage.toString());
             }
         });
         const btnNext = document.createElement('button');
@@ -391,6 +365,7 @@ export class CartController extends Controller {
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
                 }
+                setURLParams('page', this.currentPage.toString());
             }
         });
         const currentPage = document.createElement('span');
@@ -442,6 +417,8 @@ export class CartController extends Controller {
         }
         localStorage.setItem('cart', JSON.stringify(this.cart));
         this.render();
+        this.renderCompletedPromo();
+        this.setSale();
     }
     renderCartInfo(root: HTMLElement) {
         let cartInfo = document.querySelector('.cart__info');
@@ -486,7 +463,7 @@ export class CartController extends Controller {
         promoTestInfo.className = 'cart__promo-test';
         promoTestInfo.innerHTML = 'Коды для теста: RS, КупиЧоХошь';
         const foundPromo = document.createElement('div');
-        foundPromo.className = 'promo';
+        foundPromo.className = 'promo__list';
         const content = document.createElement('div');
         content.className = 'promo__found-list';
         foundPromo.append(content);
@@ -515,7 +492,7 @@ export class CartController extends Controller {
         root.innerHTML = '';
         if (!promo) return;
         const div = document.createElement('div');
-        div.className = 'promo';
+        div.className = 'promo-item';
         const content = document.createElement('div');
         content.innerHTML = `<div class="promo">
                                 <span>${promo.label}</span>
@@ -531,7 +508,12 @@ export class CartController extends Controller {
                 if (!isAdded) {
                     this.addedPromo.push(promo);
                     this.renderCompletedPromo();
-                    this.renderFoundPromo(promo);
+                    this.renderFoundPromo(null);
+                    const input = document.querySelector('.cart__promo-input');
+                    if (input instanceof HTMLInputElement) {
+                        input.value = '';
+                    }
+                    this.setSale();
                 }
             });
             div.append(content, btnAdd);
@@ -553,8 +535,8 @@ export class CartController extends Controller {
                 const fragment = new DocumentFragment();
                 this.addedPromo.forEach((promo) => {
                     const li = document.createElement('li');
+                    li.className = 'promo-item';
                     const content = document.createElement('div');
-                    content.className = 'promo';
                     content.innerHTML = `
                                         <span>${promo.label}</span>
                                         -
@@ -566,6 +548,8 @@ export class CartController extends Controller {
                         if (index !== -1) {
                             this.addedPromo = [...this.addedPromo.slice(0, index), ...this.addedPromo.slice(index + 1)];
                             this.renderCompletedPromo();
+                            this.renderFoundPromo(null);
+                            this.setSale();
                         }
                     });
                     li.append(content, btnDelete);
@@ -575,32 +559,41 @@ export class CartController extends Controller {
                 list.append(fragment);
             }
     }
-    getSumAndCount() {
-        const { sum, count } = this.cart.reduce(
-            (acc: { count: number; sum: number }, cartItem: CartItem) => {
-                acc.sum += cartItem.product.price * cartItem.count;
-                acc.count += cartItem.count;
-                return acc;
-            },
-            { count: 0, sum: 0 }
-        );
-        this.sum = sum ? sum : 0;
-        this.count = count ? count : 0;
-        const cart_sum = document.querySelector('.header__cart-info-count span');
-        if (cart_sum && cart_sum.innerHTML !== this.sum.toString()) {
-            cart_sum.innerHTML = this.sum.toString();
-        }
-        const cart_icon = document.querySelector('.header__cart-link');
-        if (cart_icon) {
-            const iconCount = cart_icon.getAttribute('data-count');
-            if (iconCount !== this.count.toString()) {
-                cart_icon.setAttribute('data-count', this.count.toString());
-                if (count > 0) {
-                    cart_icon.classList.add('on');
+    setSale() {
+        const sale = this.addedPromo.reduce((acc, item) => {
+            return acc += item.percents;
+        },0)        
+        const infoContainer = document.querySelector('.cart__info');
+        if (infoContainer) {
+            const oldPrice = infoContainer.querySelector('.cart__total-sum');
+            if (oldPrice instanceof HTMLElement) {
+                if (sale === 0) {
+                    oldPrice.classList.remove('old');
                 } else {
-                    cart_icon.classList.remove('on');
+                    oldPrice.classList.add('old')
                 }
+                let newPriceContainer = document.querySelector('.cart__total-sum--new');
+                if (!newPriceContainer && sale !== 0) {
+                    newPriceContainer = document.createElement('div');
+                    newPriceContainer.classList.add('cart__total-sum', 'cart__total-sum--new');
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${this.sum - this.sum * sale / 100}</span> €`;
+                    infoContainer.prepend(newPriceContainer);                                        
+                } 
+                if (newPriceContainer) {
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${this.sum - this.sum * sale / 100}</span> €`;
+                    if (sale === 0) {
+                        newPriceContainer.remove();
+                        infoContainer.removeChild(newPriceContainer);
+                    }
+                }
+  
+                
             }
         }
+    }
+    getSumAndCount() {
+        const {sum, count} = updateCartInfo();
+        this.sum = sum;
+        this.count = count;
     }
 }

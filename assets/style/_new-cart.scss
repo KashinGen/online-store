@@ -290,3 +290,24 @@
     }
 
 }
+
+.promo {
+    &__completed {
+        margin-bottom: 20px;
+    }
+}
+.promo-item {
+    display: flex;
+    width: 70%;
+    margin: 10px 0;
+    justify-content: space-between;
+    button {
+        background-color: $main;
+        width: 17px;
+        height: 17px;
+        display: flex;
+        align-items: center;
+        justify-content:center;
+        color: #fff;
+    }
+}
