@@ -72,3 +72,9 @@ export enum CartAction {
     INCREASE,
     DECREASE,
 }
+
+export interface Promo {
+    percents: number;
+    label: string;
+    code: string;
+}
