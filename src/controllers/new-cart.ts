@@ -278,8 +278,10 @@ export class CartController extends Controller {
                     isError
                 ) {
                     alert('Ваш заказ принят');
-                    document.querySelector('.overflow')?.remove();
                     localStorage.removeItem('cart');
+                    updateCartInfo();
+                    this.render();
+                    document.querySelector('.overflow')?.remove();
                 }
             });
         }

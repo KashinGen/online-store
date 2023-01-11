@@ -69,9 +69,16 @@ class ProductList extends Component {
                 });
                 fragment.append(card);
                 productComponent.render();
-                card.onclick = (e) => {
+                const btnAdd = card.querySelector('.product-card__add-btn');
+                if (!(btnAdd instanceof HTMLButtonElement)) return;
+                btnAdd.onclick = (e) => {
+                    e.preventDefault();
                     const target = e.target;
-                    if (target instanceof HTMLButtonElement) {
+                    if (target instanceof HTMLElement) {
+                        const btn = target.closest('.product-card__add-btn');
+                        if (!btn) {
+                            if (!(target instanceof HTMLButtonElement)) return;
+                        }
                         let c_event = new CustomEvent('build', {
                             detail: {
                                 index: index,
@@ -79,7 +86,6 @@ class ProductList extends Component {
                             },
                         });
                         this.selector.dispatchEvent(c_event);
-                        const btn = target.closest('.product-card__add-btn');
                         if (btn) {
                             if (index === -1) {
                                 const btnText = btn.querySelector('.product-card__add-btn-text');
