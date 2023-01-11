@@ -1,5 +1,5 @@
 import CartItemComponent from "../components/CartItem";
-import { CartAction, CartItem, Controller } from "../types";
+import { CartAction, CartItem, Controller, Promo } from "../types";
 
 
 export class CartController extends Controller {
@@ -10,12 +10,30 @@ export class CartController extends Controller {
     limit: number = 3;
     currentPage: number = 1;
     allPages: number = 1;
-
+    addedPromo: Promo[] = [];
+    promo: Promo[] = [
+        {
+            percents: 20,
+            label: 'RS',
+            code: 'RS'
+        },
+        {
+            percents: 10,
+            label: 'КупиЧоХошь',
+            code: 'КупиЧоХошь'
+        }
+    ]
     init() {        
         const cartJSON = localStorage.getItem('cart');
         this.cart = cartJSON ? JSON.parse(cartJSON) : [];
+        this.sum = 0;
+        this.count = 0;
+        this.limit = 3;
+        this.currentPage = 1;
+        this.allPages = 1;
         this.getCartToShow();
         this.render();
+        this.addedPromo = [];
     }
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
@@ -33,7 +51,6 @@ export class CartController extends Controller {
             this.getSumAndCount();
             if (this.cart.length !== 0) {
                 if (leftContainer instanceof HTMLElement) {
-                    console.log('sdfsdf');
                     this.renderCartControls(leftContainer);
                     this.renderCartItems(leftContainer);
                     root.append(leftContainer);
@@ -125,9 +142,7 @@ export class CartController extends Controller {
                     return;
                 } 
                 this.currentPage += 1;
-
                 this.getCartToShow();
-                console.log(this.currentPage);
                 let leftContainer = document.querySelector('.cart__left');
                 const currentPage = document.querySelector('.cart__pagination-wrapper span');
                 if (currentPage) {
@@ -181,7 +196,6 @@ export class CartController extends Controller {
                         this.currentPage -= 1;
                     }
                 }
-                
             } else {
                 this.cart[index].count -= 1;
             }
@@ -208,22 +222,47 @@ export class CartController extends Controller {
         const countContainer = document.createElement('div');
         countContainer.className = 'cart__total-count';
         countContainer.innerHTML = `Количество: <span>${this.count}</span>`;
+        // блок введенных промо
+        const completedPromo = document.createElement('div');
+        completedPromo.className = 'cart__promo-completed';
+        const title = document.createElement('div');
+        title.className = 'cart__total-count';
+        title.innerHTML = 'Введенные промокоды:'
+        const list = document.createElement('ul');
+        completedPromo.append(title, list);
+        completedPromo.style.display = 'none';
+
         // блок промокода
         const promoContainer = document.createElement('div');
         promoContainer.className = 'cart__promo-container';
         const input = document.createElement('input');
         input.className = 'cart__promo-input';
         input.setAttribute('placeholder', 'Промокод');
+        input.addEventListener('input', (e) => {
+            const target = e.target;
+            if (target instanceof HTMLInputElement) {
+                const value = target.value;
+                    const index = this.promo.findIndex((promo) => promo.code === value);
+                    this.renderFoundPromo(this.promo[index] ? this.promo[index] : null);                    
+            }
+        })
         const promoTestInfo = document.createElement('div');
         promoTestInfo.className = 'cart__promo-test';
         promoTestInfo.innerHTML = 'Коды для теста: RS, КупиЧоХошь';
-        promoContainer.append(input, promoTestInfo);
+        const foundPromo = document.createElement('div');
+        foundPromo.className = 'promo';
+        const content = document.createElement('div');
+        content.className = 'promo__found-list';
+        foundPromo.append(content);
+        promoContainer.append(completedPromo, input, promoTestInfo, foundPromo);
         // блок с кнопкой
         const btnContainer = document.createElement('div');
         btnContainer.className = 'cart__btn-container';
         const btnBuy = document.createElement('button');
         btnBuy.innerHTML = 'Оформить заказ';
-        btnBuy.addEventListener('click', () => {});
+        btnBuy.addEventListener('click', (e) => {
+
+        });
         btnContainer.appendChild(btnBuy);
         cartInfo.append(sumContainer, countContainer, promoContainer, btnContainer);
         root.append(cartInfo);
@@ -236,6 +275,72 @@ export class CartController extends Controller {
         root.append(div);
     }
 
+    renderFoundPromo(promo: Promo | null) {
+        const root = document.querySelector('.promo__found-list');
+        if (!root) return;
+        root.innerHTML = '';
+        if (!promo) return;
+        const div = document.createElement('div');
+        div.className = 'promo';
+        const content = document.createElement('div');
+        content.innerHTML = `<div class="promo">
+                                <span>${promo.label}</span>
+                                -
+                                <span>${promo.percents} %</span>
+                            </div>`
+        const item = this.addedPromo.find((item) => promo.code === item.code);
+        if (!item) {
+            const btnAdd = document.createElement('button');
+            btnAdd.innerHTML = '+';
+            btnAdd.addEventListener('click', (e) => {
+                const isAdded = this.addedPromo.findIndex((item) => item.code === promo.code) !== -1;
+                if (!isAdded) {
+                    this.addedPromo.push(promo);
+                    this.renderCompletedPromo();
+                    this.renderFoundPromo(promo);
+                }
+            });
+            div.append(content, btnAdd);
+        } else {
+            div.append(content);
+        }
+
+        if (root) {
+            root.append(div);
+        }
+    }
+    renderCompletedPromo() {
+            const root = document.querySelector('.cart__promo-completed');
+            if (root instanceof HTMLElement) {
+                root.style.display = this.addedPromo.length ? 'block' : 'none';
+            }
+            const list =  document.querySelector('.cart__promo-completed ul');
+            if (list) {
+                const fragment = new DocumentFragment();
+                this.addedPromo.forEach((promo) => {
+                    const li = document.createElement('li');
+                    const content = document.createElement('div');
+                    content.className = 'promo';
+                    content.innerHTML = `
+                                        <span>${promo.label}</span>
+                                        -
+                                        <span>${promo.percents} %</span>`
+                    const btnDelete = document.createElement('button');
+                    btnDelete.innerHTML = '-';
+                    btnDelete.addEventListener('click', (e) => {
+                        const index = this.addedPromo.findIndex((item) => item.code === promo.code);
+                        if (index !== -1) {
+                            this.addedPromo = [...this.addedPromo.slice(0, index), ...this.addedPromo.slice(index + 1)];
+                            this.renderCompletedPromo();
+                        }
+                    });
+                    li.append(content, btnDelete);
+                    fragment.append(li);
+                });
+                list.innerHTML = '';
+                list.append(fragment);
+            }
+    }
     getSumAndCount() {
         const { sum, count } = this.cart.reduce(
             (acc: { count: number; sum: number }, cartItem: CartItem) => {
@@ -245,8 +350,6 @@ export class CartController extends Controller {
             },
             { count: 0, sum: 0 }
         );
-        console.log(sum, count);
-        
         this.sum = sum ? sum : 0;
         this.count = count ? count : 0;
         const cart_sum = document.querySelector('.header__cart-info-count span');

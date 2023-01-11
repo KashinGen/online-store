@@ -1,5 +1,5 @@
-import { Component } from '../core/component';
-import { ConfigComponent } from '../types';
+import { Component } from '../../core/component';
+import { ConfigComponent } from '../../types';
 
 class RangeSlider extends Component {
     minmax: [number, number];

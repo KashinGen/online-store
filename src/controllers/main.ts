@@ -1,14 +1,13 @@
 import { fetchProducts } from '../api';
 import Loader from '../components/Loader';
 import Select from '../components/Select';
-import InputSearch from '../components/InputSearch';
-import ProductItemComponent from '../components/ProductItemComponent';
+import InputSearch from '../components/main/InputSearch';
 import { Controller, Product, CartItem, ProductViewMode, Filter, FilterCheckboxType } from '../types';
-import { debounce } from '../util';
+import { debounce, getCart, setURLParams } from '../util';
 import { OrderSort, Option } from '../types/index';
-import Checkbox from '../components/Checkbox';
-import RangeSlider from '../components/RangeSlider';
 import router from '../router';
+import ProductList from '../components/main/ProductList';
+import FilterComponent from '../components/main/Filter';
 
 export class MainController extends Controller {
     products: Product[] = [];
@@ -41,15 +40,8 @@ export class MainController extends Controller {
     };
     isPriceChanged: boolean = false;
     isStockChanged: boolean = false;
-    setURLParams(param: string, value: string): void {
-        const url = new URL(window.location.href);
-        if (value.length !== 0) {
-            url.searchParams.set(param, value);
-        } else {
-            url.searchParams.delete(param);
-        }
-        history.pushState(null, '', url);
-    }
+    cart: CartItem[] = [];
+    productList: ProductList | null = null;
     getURLParams(): void {
         const searchParams = new URLSearchParams(window.location.search);
         const categories = searchParams.getAll('categories');
@@ -92,7 +84,7 @@ export class MainController extends Controller {
     }
 
     onSearchInputHandler(value: string) {
-        this.setURLParams('q', value);
+        setURLParams('q', value);
         this.search = value;
         this.filterProducts();
     }
@@ -100,6 +92,7 @@ export class MainController extends Controller {
     async init() {
         const searchWrapper = document.querySelector('.search');
         this.getURLParams();
+        this.cart = getCart();
         if (searchWrapper && searchWrapper instanceof HTMLElement) {
             const search = new InputSearch({
                 selector: searchWrapper,
@@ -156,7 +149,24 @@ export class MainController extends Controller {
                 this.onSortClickHandler(this.selectSort, this.selected);
             }
             this.filterProducts();
-            await this.renderProducts(list);
+            this.renderProducts(list);
+            list.addEventListener('build', (e: CustomEventInit) => {
+                const detail = e.detail;
+                if (detail) {
+                    const {index, product} = detail;
+                    if (index !== -1) {
+                        if (this.cart[index].product.stock > this.cart[index].count + 1) {
+                            this.cart[index].count++;
+                        }
+                    } else {
+                        this.cart.push({
+                            product: product,
+                            count: 1,
+                        });
+                    }
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                }
+            })
         }
         if (this.search) {
             this.onSearchInputHandler(this.search);
@@ -169,13 +179,15 @@ export class MainController extends Controller {
                 stock: [...this.filterData.stock],
             };
             this.filterProducts();
-            this.renderFilter();
+            this.renderFilter();            
+
             const list = document.querySelector('.main__products-list');
             router.push('/');
             if (list && list instanceof HTMLElement) {
                 this.renderProducts(list);
             }
         });
+
         document.querySelector('.filter__copy-btn')?.addEventListener('click', (e) => {
             navigator.clipboard.writeText(window.location.href);
             const target = e.target;
@@ -187,14 +199,73 @@ export class MainController extends Controller {
                 }, 1500);
             }
         });
+        const filterRoot = document.querySelector('.main__filter');
+        if (filterRoot instanceof HTMLElement) {
+            filterRoot.addEventListener('checkBoxEvent', (e) => {
+                if (e instanceof CustomEvent) {
+                    const {value, checked, type}: {value: string, checked: boolean, type: FilterCheckboxType} = e.detail;
+                    if (type === FilterCheckboxType.BRAND || type === FilterCheckboxType.CATEGORY) {
+                        if (checked) {
+                            const index = this.filter[type].findIndex((item: string) => item === value);
+                            if (index !== -1) {
+                                this.filter[type] = [
+                                    ...this.filter[type].slice(0, index),
+                                    ...this.filter[type].slice(index + 1),
+                                ];
+                            } else {
+                                this.filter[type].push(value);
+                            }
+                        } else {
+                            this.filter[type].push(value);
+                        }                                                
+                        setURLParams(type, this.filter[type].join(''));
+                    }
+                    this.renderFilter();            
+                    this.filterProducts();
+                }
+        })
+        filterRoot.addEventListener('priceChanged', (e) => {
+            if (e instanceof CustomEvent) {
+                const value = e.detail.value;
+                if (value) {
+                    this.onPriceRangeHandler(value);
+                }
+
+            }
+        });
+        filterRoot.addEventListener('stockChanged', (e) => {
+            if (e instanceof CustomEvent) {
+                const value = e.detail.value;
+                if (value) {
+                    this.onStockRangeHandler(value);
+                }
+
+            }
+        });
+    }
+    }
+    renderFilter() {
+        const filterRoot = document.querySelector('.main__filter');
+        if (filterRoot instanceof HTMLElement) {
+            const filter = new FilterComponent(
+                this.filterData,
+                this.filter,
+                this.filteredProducts,
+                {
+                    selector: filterRoot,
+                    template: ''
+                }
+            );
+            filter.render();
+        }
     }
 
     onPriceRangeHandler(value: [number, number]) {
         if (JSON.stringify(this.filter.price) !== JSON.stringify(value)) {
             this.filter.price = value;
             this.isPriceChanged = true;
-            this.setURLParams('price-from', this.filter.price[0].toString());
-            this.setURLParams('price-to', this.filter.price[1].toString());
+            setURLParams('price-from', this.filter.price[0].toString());
+            setURLParams('price-to', this.filter.price[1].toString());
             setTimeout(() => {
                 this.filterProducts();
             });
@@ -205,8 +276,8 @@ export class MainController extends Controller {
         if (JSON.stringify(this.filter.stock) !== JSON.stringify(value)) {
             this.filter.stock = value;
             this.isStockChanged = true;
-            this.setURLParams('stock-from', this.filter.stock[0].toString());
-            this.setURLParams('stock-to', this.filter.stock[1].toString());
+            setURLParams('stock-from', this.filter.stock[0].toString());
+            setURLParams('stock-to', this.filter.stock[1].toString());
             setTimeout(() => {
                 this.filterProducts();
             });
@@ -218,14 +289,12 @@ export class MainController extends Controller {
         if (list && list instanceof HTMLElement) {
             this.setLoading(list);
             let products = this.products;
-            let isFilterEmpty = true;
             if (this.filter.brands.length !== 0) {
                 products = products.filter((item) => {
                     return this.filter.brands.includes(item.brand);
                 });
             }
             if (this.filter.categories.length !== 0) {
-                isFilterEmpty = false;
                 products = products.filter((item) => {
                     return this.filter.categories.includes(item.category);
                 });
@@ -248,11 +317,13 @@ export class MainController extends Controller {
                     return item.price >= this.filter.price[0] && item.price <= this.filter.price[1];
                 });
             }
+
             if (this.isStockChanged) {
                 products = products.filter((item) => {
                     return item.stock >= this.filter.stock[0] && item.stock <= this.filter.stock[1];
                 });
             }
+
             if (products.length > 0) {
                 let min = 1000000;
                 let max = 0;
@@ -284,6 +355,7 @@ export class MainController extends Controller {
             countContainer.innerHTML = this.filteredProducts.length.toString();
         }
     }
+
     getFilter() {
         const brands: { [key: string]: boolean } = {};
         const categories: { [key: string]: boolean } = {};
@@ -312,108 +384,8 @@ export class MainController extends Controller {
             this.filter.stock[0] + this.filter.stock[1] === 0 ? [minStock, maxStock] : this.filter.stock;
         this.renderFilter();
     }
-    renderFilter() {
-        const brandsFilterBlock = document.querySelector('.filter-item.brands');
-        if (brandsFilterBlock) {
-            this.renderFilterList(this.filterData.brands, brandsFilterBlock, FilterCheckboxType.BRAND);
-        }
-        const categoriesFilterBlock = document.querySelector('.filter-item.categories');
-        if (categoriesFilterBlock) {
-            this.renderFilterList(this.filterData.categories, categoriesFilterBlock, FilterCheckboxType.CATEGORY);
-        }
-        const priceFilterBlock = document.querySelector('.filter-item.price .filter-item__content');
-        if (priceFilterBlock && priceFilterBlock instanceof HTMLElement) {
-            priceFilterBlock.innerHTML = '';
-            this.filter.price[0], this.filter.price[1];
-            const slider = new RangeSlider(
-                [this.filterData.price[0], this.filterData.price[1]],
-                [this.filter.price[0], this.filter.price[1]],
-                this.onPriceRangeHandler.bind(this),
-                {
-                    selector: priceFilterBlock,
-                    template: '',
-                }
-            );
-            slider.render();
-        }
-        const stockFilterBlock = document.querySelector('.filter-item.stock .filter-item__content');
-        if (stockFilterBlock && stockFilterBlock instanceof HTMLElement) {
-            stockFilterBlock.innerHTML = '';
-            const slider = new RangeSlider(
-                [this.filterData.stock[0], this.filterData.stock[1]],
-                [this.filter.stock[0], this.filter.stock[1]],
-                this.onStockRangeHandler.bind(this),
-                {
-                    selector: stockFilterBlock,
-                    template: '',
-                }
-            );
-            slider.render();
-        }
-        const checkboxes = document.querySelectorAll('.filter-item input[type=checkbox]');
-        checkboxes.forEach((element: Element) => {
-            element.addEventListener('change', (e) => {
-                const target = e.target;
-                if (target && target instanceof HTMLInputElement) {
-                    const type = target.name;
-                    const value = target.value;
-                    const checked = target.checked;
-                    if (type === FilterCheckboxType.BRAND || type === FilterCheckboxType.CATEGORY) {
-                        if (!checked) {
-                            const index = this.filter[type].findIndex((item) => item === value);
-                            if (index !== -1) {
-                                this.filter[type] = [
-                                    ...this.filter[type].slice(0, index),
-                                    ...this.filter[type].slice(index + 1),
-                                ];
-                            } else {
-                                this.filter[type].push(value);
-                            }
-                        } else {
-                            this.filter[type].push(value);
-                        }
-                        this.setURLParams(type, this.filter[type].join(''));
-                    }
-                    this.filterProducts();
-                }
-            });
-        });
-    }
-    renderFilterList(arr: string[], root: Element, type: FilterCheckboxType) {
-        const list = root.querySelector('.filter-item__list');
-        if (list) {
-            list.innerHTML = '';
-            const fragment = new DocumentFragment();
-            arr.forEach((item) => {
-                const li = document.createElement('li');
-                const checkboxItem = new Checkbox(
-                    {
-                        value: item,
-                        name: type.toString(),
-                        label: item,
-                        checked: this.filter[type].includes(item),
-                        disabled:
-                            this.filteredProducts.findIndex((pr) => {
-                                if (type === FilterCheckboxType.BRAND) {
-                                    return pr.brand === item;
-                                }
-                                if (type === FilterCheckboxType.CATEGORY) {
-                                    return pr.category === item;
-                                }
-                            }) === -1,
-                    },
-                    {
-                        selector: li,
-                        template: '',
-                    }
-                );
-                fragment.append(li);
-                checkboxItem.render();
-            });
-            list.innerHTML = '';
-            list.append(fragment);
-        }
-    }
+
+
 
     onChangeViewHandler(select: Select, option: Option): void {
         select.changeSelection(option);
@@ -421,10 +393,10 @@ export class MainController extends Controller {
         if (list && list instanceof HTMLElement) {
             if (option.value === ProductViewMode.LIST) {
                 list.classList.add('list');
-                this.setURLParams('view', option.value);
+                setURLParams('view', option.value);
             } else {
                 list.classList.remove('list');
-                this.setURLParams('view', '');
+                setURLParams('view', '');
             }
         }
     }
@@ -453,11 +425,10 @@ export class MainController extends Controller {
     onSortClickHandler(select: Select, option: Option): void {
         select.changeSelection(option);
         if (JSON.stringify(option) !== JSON.stringify(this.selected)) {
-            this.setURLParams('sort', option.value);
-            this.setURLParams('order', option.order !== undefined ? option.order.toString() : '');
+            setURLParams('sort', option.value);
+            setURLParams('order', option.order !== undefined ? option.order.toString() : '');
         }
         const list = document.querySelector('.main__products-list');
-
         if (list && list instanceof HTMLElement) {
             this.setLoading(list);
             switch (option.value) {
@@ -483,115 +454,12 @@ export class MainController extends Controller {
             }, 100);
         }
     }
-
-    async renderProducts(root: HTMLElement) {
-        const fragment = new DocumentFragment();
-        const cartJSON = localStorage.getItem('cart');
-        const cart = cartJSON ? JSON.parse(cartJSON) : [];
-        if (this.filteredProducts.length !== 0) {
-            this.filteredProducts.forEach((product) => {
-                const card = document.createElement('div');
-                card.classList.add('product-card');
-                const index = cart.findIndex((item: CartItem) => item.product.id === product.id);
-                const isInCart = index !== -1;
-                const productComponent = new ProductItemComponent(product, {
-                    selector: card,
-                    template: `<a href="/detail/${product.id}" target='_blank' class="router-link">
-                        <div class='product-card__img-wrapper'>
-                            <div class="product-card__img" style="background: url('${
-                                product.thumbnail
-                            }') center/cover"></div>
-                        </div>
-                    </a>
-                    <div class="product-card__content">
-                        <div class="product-card__reviews-container">
-                            <div class="product-card__rating ${product.rating >= 4.5 ? 'blue' : ''}">
-                                <span class='product-card__rating-star'></span>
-                                <span class='product-card__rating-number'>${product.rating.toFixed(1)}</span>
-                            </div>
-                            <div class="product-card__price">${product.price} €</div>
-                        </div>
-                        <a href="/detail/${product.id}" target='_blank' class="router-link product-card__name">
-                            ${product.title}
-                        </a>
-                        <ul class="product-card__info">
-                            <li>
-                                <span>Бренд</span>
-                                <span></span>
-                                <span>${product.brand}</span>
-                            </li>
-                            <li>
-                                <span>Категория</span>
-                                <span></span>
-                                <span>${product.category}</span>
-                            </li>
-                            <li>
-                                <span>В наличии</span>
-                                <span></span>
-                                <span>${product.stock} шт.</span>
-                            </li>
-                        </ul>
-                        <div style='flex: 1 1 0%'></div>
-                    </div>
-                    <button class='product-card__add-btn'>
-                        <span class='product-card__add-btn-text'>${isInCart ? 'В корзине' : 'В корзину'}</span>
-                        <span class='product-card__add-btn-icon'></span>
-                    </button>
-                    `,
-                });
-                fragment.append(card);
-                productComponent.render();
-                card.addEventListener('click', (e) => {
-                    const target = e.target;
-                    if (target instanceof HTMLElement) {
-                        const btn = target.closest('.product-card__add-btn');
-                        if (btn) {
-                            if (index !== -1) {
-                                if (cart[index].product.stock > cart[index].count + 1) {
-                                    cart[index].count++;
-                                }
-                            } else {
-                                cart.push({
-                                    product: product,
-                                    count: 1,
-                                });
-                                const btnText = btn.querySelector('.product-card__add-btn-text');
-                                if (btnText) {
-                                    btnText.innerHTML = 'В корзине';
-                                }
-                            }
-                            localStorage.setItem('cart', JSON.stringify(cart));
-                            const cart_sum = document.querySelector('.header__cart-info-count span');
-                            const { sum, count } = cart.reduce(
-                                (acc: { count: number; sum: number }, cartItem: CartItem) => {
-                                    acc.sum += cartItem.product.price * cartItem.count;
-                                    acc.count += cartItem.count;
-                                    return acc;
-                                },
-                                { count: 0, sum: 0 }
-                            );
-                            if (cart_sum) {
-                                cart_sum.innerHTML = sum;
-                            }
-                            const cart_icon = document.querySelector('.header__cart-link');
-                            if (cart_icon) {
-                                cart_icon.setAttribute('data-count', count);
-                                if (count > 0) {
-                                    cart_icon.classList.add('on');
-                                }
-                            }
-                        }
-                    }
-                });
-            });
-            root.innerHTML = '';
-            root.append(fragment);
-        } else {
-            const notFoundWrapper = document.createElement('div');
-            notFoundWrapper.className = 'main__not-found';
-            notFoundWrapper.innerHTML = 'Ой, сори, мы не нашли товаров :(';
-            root.innerHTML = '';
-            root.append(notFoundWrapper);
-        }
+    renderProducts(root: HTMLElement) {
+        const list = new ProductList({
+            selector: root,
+            template: ''
+        })
+        list.render();
+        list.renderProduct(this.filteredProducts, this.cart);
     }
 }

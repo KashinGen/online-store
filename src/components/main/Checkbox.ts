@@ -1,5 +1,5 @@
-import { Component } from '../core/component';
-import { ConfigComponent, CheckboxProps } from '../types';
+import { Component } from '../../core/component';
+import { ConfigComponent, CheckboxProps } from '../../types';
 
 class Checkbox extends Component {
     props: CheckboxProps;
@@ -20,6 +20,19 @@ class Checkbox extends Component {
                 <span class="checkmark"></span>${this.props.label}
             </label>`;
         super.render();
+        const input = this.selector.querySelector('input[type=checkbox]');
+        if (input instanceof HTMLInputElement)  {
+            input.addEventListener('change', (e) => {
+                let c_event = new CustomEvent("checkBoxEvent",{detail: {
+                    value: this.props.value,
+                    checked: this.props.checked,
+                    type: this.props.name
+                }});
+                const filterRoot = document.querySelector('.main__filter');
+                filterRoot?.dispatchEvent(c_event);
+            })
+        }
+
     }
 }
 export default Checkbox;

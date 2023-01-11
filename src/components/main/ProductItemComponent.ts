@@ -1,5 +1,5 @@
-import { Component } from '../core/component';
-import { Product, ConfigComponent } from '../types';
+import { Component } from '../../core/component';
+import { Product, ConfigComponent } from '../../types';
 
 class ProductItemComponent extends Component {
     product: Product;
