@@ -91,8 +91,7 @@ export class CartController extends Controller {
         const adress: HTMLInputElement | null = document.querySelector('.adress');
         const email: HTMLInputElement | null = document.querySelector('.mail');
         const cardnumber: HTMLInputElement | null = document.querySelector('.cardnumber');
-        const cardData: HTMLInputElement | null = document.querySelector('.valid');
-                
+        const cardData: HTMLInputElement | null = document.querySelector('.valid');       
         const typeCard: HTMLSpanElement | null = document.querySelector('.type-card');
         const cvv: HTMLInputElement | null = document.querySelector('.cvv');
         if (name instanceof HTMLInputElement) {
@@ -204,8 +203,8 @@ export class CartController extends Controller {
                     const errorCardData = document.querySelector('.error-valid');
                     if (!errorCardData) return;
                     if (str) {
-                        const month = +str.slice(0, 2) <= 31 && +str.slice(0, 2) != 0;
-                        const year = +str.slice(3) <= 12 && +str.slice(3) != 0;
+                        const month = +str.slice(0, 2) <= 12 && +str.slice(0, 2) != 0;
+                        const year = +str.slice(3) != 0;
                         const value = str.length > 2 ? str.slice(0, 2) + str.slice(3) : str;
                         if (isNaN(+value)) {
                             cardData.value = str.slice(0, str.length - 1);
@@ -242,10 +241,47 @@ export class CartController extends Controller {
                 } 
             });
         }
+        const error: HTMLSpanElement | NodeList | null = document.querySelectorAll('.error')
         const bthSubmit: HTMLButtonElement | null = document.querySelector('.bth-submit');
-        if (bthSubmit) {
+        if (bthSubmit && error) {
             bthSubmit.addEventListener('click', () => {
-                
+                const arrayResult: String[] = [];
+                if (name instanceof HTMLInputElement) {
+                    arrayResult.push(name.value);
+                    }
+                if (phone instanceof HTMLInputElement) {
+                    arrayResult.push(phone.value);
+                    }
+                if (adress instanceof HTMLInputElement) {
+                    arrayResult.push(adress.value);
+                    }
+                if (email instanceof HTMLInputElement) {
+                    arrayResult.push(email.value);
+                    }
+                if (cardnumber instanceof HTMLInputElement) {
+                    arrayResult.push(cardnumber.value);
+                    }
+                if (cardData instanceof HTMLInputElement) {
+                    arrayResult.push(cardData.value);
+                    }
+                if (cvv instanceof HTMLInputElement) {
+                    arrayResult.push(cvv.value);
+                    }
+                const errorArray: String[] = [];
+                error.forEach((el) => {
+                    if (el.textContent !== null){
+                    errorArray.push(el.textContent)}
+                })
+                let isError = errorArray.every((el) => {
+                    return el.toString() !== 'ERROR';
+                })
+                if (arrayResult.every((el) => {
+                     return el.length > 2
+                    }) && isError) {
+                    alert('Ваш заказ принят');
+                    document.querySelector('.overflow')?.remove();
+                    localStorage.removeItem('cart');
+                }
             });
         }       
     }

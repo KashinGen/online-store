@@ -432,3 +432,34 @@
 //     }
 // }
 
+// if (bthSubmit) {
+//     bthSubmit.addEventListener('click', () => {
+//         if (name instanceof HTMLInputElement) {
+//             name.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//         if (phone instanceof HTMLInputElement) {
+//             phone.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//         if (adress instanceof HTMLInputElement) {
+//             adress.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//         if (email instanceof HTMLInputElement) {
+//             email.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//         if (cardnumber instanceof HTMLInputElement) {
+//             cardnumber.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//         if (cardData instanceof HTMLInputElement) {
+//             cardData.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//         if (cvv instanceof HTMLInputElement) {
+//             cvv.addEventListener('input', (e) => {
+//                 if (e.target instanceof HTMLInputElement) {}
+//             })}
+//     });
