@@ -176,8 +176,9 @@ export class DetailController extends Controller {
             btnBuyOneClick.addEventListener('click', (e) => {
                 const target = e.target;
                 if (!target) return;
-                if (isInCart) return;
-                this.addToCart(cart, index);
+                if (!isInCart) {
+                    this.addToCart(cart, index);
+                }
                 localStorage.setItem('buy-one-click', 'true');
                 router.push('/cart');
             });
