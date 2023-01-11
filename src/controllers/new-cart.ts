@@ -1,7 +1,7 @@
 
 import CartItemComponent from '../components/CartItem';
 import { CartAction, CartItem, Controller, Promo } from '../types';
-import { getCart, updateCartInfo } from '../util';
+import { getCart, setURLParams, updateCartInfo } from '../util';
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
@@ -15,7 +15,7 @@ export class CartController extends Controller {
     promo: Promo[] = [
         {
             percents: 20,
-            label: 'RS',
+            label: 'RS School',
             code: 'RS'
         },
         {
@@ -33,21 +33,36 @@ export class CartController extends Controller {
         this.currentPage = 1;
         this.allPages = 1;
         this.getCartToShow();
+        this.getURLParams();        
         this.render();
         this.addedPromo = [];
     }
+    getURLParams(): void {
+        const searchParams = new URLSearchParams(window.location.search);
+        const limit = searchParams.get('limit');
+        const page = searchParams.get('page');
+        if (limit) {
+            const selectedLimit = +limit <= this.cart.length && +limit >= 1 ? +limit : this.cart.length;
+            this.limit = selectedLimit;
+        }
+        if (page) {
+            let selectedPage = +page;
+            if (selectedPage < 1) {
+                selectedPage = 1;
+            }
+            if (selectedPage > this.allPages) {
+                selectedPage = this.allPages;
+            }
+            this.currentPage = selectedPage;
+        }
+        this.getCartToShow();
+    }
+
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
-        console.log(this.cartToShow, 'show');
-        console.log(this.limit);
-        console.log(this.currentPage);
-        console.log(this.cart);
-        
-        
-        
-        
-        this.allPages = Math.ceil(this.cart.length / this.limit);
+        this.allPages = Math.ceil(this.cart.length / this.limit);        
     }
+
     openModal() {
         const blockCreditCard: string = `
         <div>
@@ -296,6 +311,8 @@ export class CartController extends Controller {
                 let leftContainer = document.querySelector('.cart__left');
                 this.currentPage = 1;
                 this.getCartToShow();
+                setURLParams('page', this.currentPage.toString());
+                setURLParams('limit', this.limit.toString());
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
                 }
@@ -329,6 +346,7 @@ export class CartController extends Controller {
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
                 }
+                setURLParams('page', this.currentPage.toString());
             }
         });
         const btnNext = document.createElement('button');
@@ -348,6 +366,7 @@ export class CartController extends Controller {
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
                 }
+                setURLParams('page', this.currentPage.toString());
             }
         });
         const currentPage = document.createElement('span');
@@ -549,8 +568,6 @@ export class CartController extends Controller {
         if (infoContainer) {
             const oldPrice = infoContainer.querySelector('.cart__total-sum');
             if (oldPrice instanceof HTMLElement) {
-                console.log('sum');
-
                 if (sale === 0) {
                     oldPrice.classList.remove('old');
                 } else {
