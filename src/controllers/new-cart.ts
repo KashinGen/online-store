@@ -283,6 +283,17 @@ export class CartController extends Controller {
                 }
             });
         }
+        const overflow: HTMLDivElement | null = document.querySelector('.overflow');
+        if (overflow) {
+            overflow.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target) {
+                    if (target == overflow) {
+                        overflow.remove();
+                    }
+                }
+            });
+        }
     }
     render() {
         const root = document.querySelector('.cart__inner');
