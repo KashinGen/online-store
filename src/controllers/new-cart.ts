@@ -36,6 +36,11 @@ export class CartController extends Controller {
         this.getURLParams();
         this.render();
         this.addedPromo = [];
+        const isButOneClick = localStorage.getItem('buy-one-click');
+        if (isButOneClick) {
+            this.openModal();
+            localStorage.removeItem('buy-one-click');
+        }
     }
     getURLParams(): void {
         const searchParams = new URLSearchParams(window.location.search);
