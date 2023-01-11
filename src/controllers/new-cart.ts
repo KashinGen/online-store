@@ -1,6 +1,5 @@
-import CartItemComponent from "../components/CartItem";
-import { CartAction, CartItem, Controller } from "../types";
-
+import CartItemComponent from '../components/CartItem';
+import { CartAction, CartItem, Controller } from '../types';
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
@@ -11,7 +10,7 @@ export class CartController extends Controller {
     currentPage: number = 1;
     allPages: number = 1;
 
-    init() {        
+    init() {
         const cartJSON = localStorage.getItem('cart');
         this.cart = cartJSON ? JSON.parse(cartJSON) : [];
         this.getCartToShow();
@@ -19,10 +18,10 @@ export class CartController extends Controller {
     }
     getCartToShow() {
         this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
-        this.allPages = Math.ceil(this.cart.length / this.limit); 
+        this.allPages = Math.ceil(this.cart.length / this.limit);
     }
     openModal() {
-    const blockCreditCard: string = `
+        const blockCreditCard: string = `
         <div>
         <form id="auth-card"  method="get" action="../../src/controllers/new-cart.ts">
         <div><span class='type-card'></span><input name="card" placeholder="Card number" type="number" class="cardnumber"><span class='error error-card'></span></div>
@@ -199,16 +198,14 @@ export class CartController extends Controller {
             });
             const bthSubmit: HTMLButtonElement | null = document.querySelector('.bth-submit');
             if (bthSubmit) {
-                bthSubmit.addEventListener('click', () => {
-                    
-                })
+                bthSubmit.addEventListener('click', () => {});
             }
-            });
+        });
     }
     render() {
         const root = document.querySelector('.cart__inner');
         if (root instanceof HTMLElement) {
-            let leftContainer = root.querySelector('.cart__left');            
+            let leftContainer = root.querySelector('.cart__left');
             if (!(leftContainer instanceof HTMLElement)) {
                 leftContainer = document.createElement('div');
                 leftContainer.className = 'cart__left';
@@ -262,9 +259,10 @@ export class CartController extends Controller {
                     target.value = '1';
                     this.limit = 1;
                 } else {
-                    this.limit = + value;
+                    this.limit = +value;
                 }
-                let leftContainer = document.querySelector('.cart__left');                this.getCartToShow();
+                let leftContainer = document.querySelector('.cart__left');
+                this.getCartToShow();
                 this.getCartToShow();
                 if (leftContainer instanceof HTMLElement) {
                     this.renderCartItems(leftContainer);
@@ -280,7 +278,7 @@ export class CartController extends Controller {
         // блок пагинации
         const pagination = document.createElement('div');
         pagination.className = 'cart__pagination';
-        const paginationWrapper = document.createElement('div')
+        const paginationWrapper = document.createElement('div');
         paginationWrapper.className = 'cart__pagination-wrapper';
         const paginationSpan = document.createElement('span');
         paginationSpan.innerHTML = 'Страница: ';
@@ -289,7 +287,7 @@ export class CartController extends Controller {
         btnPrev.addEventListener('click', (e) => {
             if (e.target && e.target instanceof HTMLButtonElement) {
                 if (this.currentPage === 1) return;
-                this.currentPage -= 1;              
+                this.currentPage -= 1;
                 this.getCartToShow();
                 const currentPage = document.querySelector('.cart__pagination-wrapper span');
                 if (currentPage) {
@@ -304,10 +302,10 @@ export class CartController extends Controller {
         const btnNext = document.createElement('button');
         btnNext.innerHTML = '&gt;';
         btnNext.addEventListener('click', (e) => {
-            if (e.target instanceof HTMLButtonElement) { 
+            if (e.target instanceof HTMLButtonElement) {
                 if (this.currentPage === this.allPages) {
                     return;
-                } 
+                }
                 this.currentPage += 1;
 
                 this.getCartToShow();
@@ -340,24 +338,20 @@ export class CartController extends Controller {
         this.cartToShow.forEach((cart_item) => {
             const cartItem = document.createElement('div');
             cartItem.className = 'cart-item';
-            const cartItemComponent = new CartItemComponent(
-                cart_item,
-                this.onChangeCartCount.bind(this),
-                {
-                    selector: cartItem,
-                    template: '',
-                }
-            );
+            const cartItemComponent = new CartItemComponent(cart_item, this.onChangeCartCount.bind(this), {
+                selector: cartItem,
+                template: '',
+            });
             cart_list?.appendChild(cartItem);
-            cartItemComponent.render();    
+            cartItemComponent.render();
         });
         root.append(cart_list);
     }
     onChangeCartCount(cart_item: CartItemComponent, action: CartAction) {
-        const index = this.cart.findIndex((item) => item.product.id === cart_item.cartItem.product.id);        
+        const index = this.cart.findIndex((item) => item.product.id === cart_item.cartItem.product.id);
         if (index === -1) return;
         if (action === CartAction.DECREASE) {
-            if (this.cart[index].count - 1  === 0) {
+            if (this.cart[index].count - 1 === 0) {
                 this.cart = [...this.cart.slice(0, index), ...this.cart.slice(index + 1)];
                 this.getCartToShow();
                 if (this.cartToShow.length === 0) {
@@ -365,7 +359,6 @@ export class CartController extends Controller {
                         this.currentPage -= 1;
                     }
                 }
-                
             } else {
                 this.cart[index].count -= 1;
             }
@@ -374,7 +367,7 @@ export class CartController extends Controller {
             if (this.cart[index].count + 1 > this.cart[index].product.stock) return;
             this.cart[index].count += 1;
         }
-        localStorage.setItem('cart', JSON.stringify(this.cart));        
+        localStorage.setItem('cart', JSON.stringify(this.cart));
         this.render();
     }
     renderCartInfo(root: HTMLElement) {
@@ -416,7 +409,7 @@ export class CartController extends Controller {
         root.innerHTML = '';
         const div = document.createElement('div');
         div.className = 'cart__empty';
-        div.innerHTML = 'Ваша корзина пуста!'
+        div.innerHTML = 'Ваша корзина пуста!';
         root.append(div);
     }
 
@@ -430,7 +423,6 @@ export class CartController extends Controller {
             { count: 0, sum: 0 }
         );
         console.log(sum, count);
-        
         this.sum = sum ? sum : 0;
         this.count = count ? count : 0;
         const cart_sum = document.querySelector('.header__cart-info-count span');
@@ -448,7 +440,6 @@ export class CartController extends Controller {
                     cart_icon.classList.remove('on');
                 }
             }
-
         }
     }
 }
