@@ -1,4 +1,4 @@
-import { CartItem } from "./types";
+import { CartItem } from './types';
 
 export function debounce<F extends (...params: Event[]) => void>(fn: F, delay: number) {
     let timeoutID: number | null = null;
@@ -32,6 +32,7 @@ export function updateCartInfo() {
             cart_icon.classList.add('on');
         }
     }
+    return { sum, count };
 }
 
 export function getCart() {

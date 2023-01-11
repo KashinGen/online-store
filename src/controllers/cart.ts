@@ -233,10 +233,9 @@
 // }        
 
 // const bthBuyNow = document.querySelector('.bth-buy-now');
-// console.log(bthBuyNow)
+
 // if (bthBuyNow instanceof HTMLButtonElement) {
 //     bthBuyNow.addEventListener('click', ()=>{
-
 //         const blockCreditCard = `
 //         <div>
 //         <div><span class='type-card'></span><input placeholder="Card number" type="number" class="cardnumber"><span class='error error-card'></span></div>
