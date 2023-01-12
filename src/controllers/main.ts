@@ -154,7 +154,8 @@ export class MainController extends Controller {
                 if (e instanceof CustomEvent) {
                     const detail = e.detail;
                     if (detail) {
-                        const { index, product } = detail;
+                        const { product } = detail;
+                        const index = this.cart.findIndex((item) => item.product.id === product.id);
                         if (index !== -1) {
                             if (this.cart[index].product.stock > this.cart[index].count + 1) {
                                 this.cart[index].count++;
@@ -180,6 +181,15 @@ export class MainController extends Controller {
                 price: [...this.filterData.price],
                 stock: [...this.filterData.stock],
             };
+            this.isPriceChanged = false;
+            this.isStockChanged = false;
+            const searchInput = document.querySelector('.input-search__input');
+            if (searchInput instanceof HTMLInputElement) {
+                searchInput.value = '';
+                setURLParams('q', '');
+                this.onSearchInputHandler('');
+                this.search = '';
+            }
             this.filterProducts();
             this.renderFilter();
 

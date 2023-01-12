@@ -1,4 +1,5 @@
 import CartItemComponent from '../components/CartItem';
+import router from '../router';
 import { CartAction, CartItem, Controller, Promo } from '../types';
 import { enforceFormat, formatToPhone, getCart, setURLParams, updateCartInfo } from '../util';
 
@@ -117,9 +118,25 @@ export class CartController extends Controller {
                 }
             });
         }
-        if (phone instanceof HTMLInputElement) {
-            phone.addEventListener('keydown', enforceFormat);
-            phone.addEventListener('keyup', formatToPhone);
+        if (phone) {
+            phone.addEventListener('input', (e) => {
+                const target = e.target;
+                if (target instanceof HTMLInputElement) {
+                    const value = target.value;
+                    const phoneAllowed = '+0123456789';
+                    const errorPhone = document.querySelector('.error-phone');
+                    let error = !value.split('').every((char) => phoneAllowed.includes(char));
+                    if (value[0] !== '+' || value.length < 10) {
+                        error = true;
+                    }
+                    if (!errorPhone) return;
+                    if (!error) {
+                        errorPhone.innerHTML = '';
+                    } else {
+                        errorPhone.innerHTML = 'ERROR';
+                    }
+                }
+            });
         }
         if (adress instanceof HTMLInputElement) {
             adress.addEventListener('input', (e) => {
@@ -283,6 +300,12 @@ export class CartController extends Controller {
                     document.querySelector('.overflow')?.remove();
                     updateCartInfo();
                     this.render();
+
+                    setTimeout(() => {
+                        router.push('/');
+                        document.querySelector('.overflow')?.remove();
+                    }, 3000);
+
                 } else {
                     for (let i = 0; i <= arrayResult.length; i++) {
                         if (arrayResult[i].length < 2) {
@@ -528,7 +551,7 @@ export class CartController extends Controller {
         btnContainer.className = 'cart__btn-container';
         const btnBuy = document.createElement('button');
         btnBuy.innerHTML = 'Оформить заказ';
-        btnBuy.addEventListener('click', this.openModal);
+        btnBuy.addEventListener('click', () => this.openModal());
         btnContainer.appendChild(btnBuy);
         cartInfo.append(sumContainer, countContainer, promoContainer, btnContainer);
         root.append(cartInfo);

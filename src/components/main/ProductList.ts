@@ -81,7 +81,6 @@ class ProductList extends Component {
                         }
                         let c_event = new CustomEvent('build', {
                             detail: {
-                                index: index,
                                 product: product,
                             },
                         });
@@ -93,7 +92,6 @@ class ProductList extends Component {
                                     btnText.innerHTML = 'В корзине';
                                 }
                             }
-                            localStorage.setItem('cart', JSON.stringify(cart));
                             updateCartInfo();
                         }
                     }

@@ -15,7 +15,6 @@ class Checkbox extends Component {
                         value="${this.props.value}" 
                         name="${this.props.name}" 
                         ${this.props.checked ? 'checked' : ''}
-                        ${this.props.disabled && !this.props.checked ? 'disabled' : ''}
                         />
                 <span class="checkmark"></span>${this.props.label}
             </label>`;
