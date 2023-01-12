@@ -90,6 +90,38 @@ export class MainController extends Controller {
     }
 
     async init() {
+        this.products = [];
+        this.filteredProducts = [];
+        this.optionsSort = [
+            { value: 'alphabet', order: OrderSort.ASC, label: 'По алфавиту' },
+            { value: 'price', order: OrderSort.ASC, label: 'По возрастанию цены' },
+            { value: 'price', order: OrderSort.DESC, label: 'По убыванию цены' },
+            { value: 'rating', order: OrderSort.ASC, label: 'По рейтингу' },
+        ];
+        this.selected = this.optionsSort[0];
+        this.optionsView = [
+            { value: ProductViewMode.TABLE, label: 'Таблицей' },
+            { value: ProductViewMode.LIST, label: 'Списком' },
+        ];
+        this.selectSort = null;
+        this.selectedView = this.optionsView[0];
+        this.search = '';
+        this.filter = {
+            brands: [],
+            categories: [],
+            price: [0, 0],
+            stock: [0, 0],
+        };
+        this.filterData = {
+            brands: [],
+            categories: [],
+            price: [0, 0],
+            stock: [0, 0],
+        };
+        this.isPriceChanged = false;
+        this.isStockChanged = false;
+        this.cart = [];
+        this.productList = null;
         const searchWrapper = document.querySelector('.search');
         this.getURLParams();
         this.cart = getCart();
@@ -344,9 +376,11 @@ export class MainController extends Controller {
                     minStock = item.stock < minStock ? item.stock : minStock;
                     maxStock = item.stock > maxStock ? item.stock : maxStock;
                 });
-                if (!this.isPriceChanged || !this.isStockChanged) {
-                    this.filter.price = [min, max];
+                if (!this.isStockChanged) {
                     this.filter.stock = [minStock, maxStock];
+                }
+                if (!this.isPriceChanged) {
+                    this.filter.price = [min, max];
                 }
             }
             this.filteredProducts = products;
