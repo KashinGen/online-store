@@ -93,11 +93,12 @@ export const formatToPhone = (event: KeyboardEvent) => {
         const last = input.substring(6, 10);
 
         if (input.length > 6) {
-            target.value = `(${areaCode}) ${middle} - ${last}`;
+            target.value = `+(${areaCode}) ${middle} - ${last}`;
         } else if (length > 3) {
-            target.value = `(${areaCode}) ${middle}`;
+            target.value = `+(${areaCode}) ${middle}`;
         } else if (length > 0) {
-            target.value = `(${areaCode}`;
+            target.value = `+(${areaCode}`;
         }
+        console.log(target.value);
     }
 };
