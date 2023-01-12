@@ -268,6 +268,7 @@ export class CartController extends Controller {
                         errorArray.push(el.textContent);
                     }
                 });
+
                 let isError = errorArray.every((el) => {
                     return el.toString() !== 'ERROR';
                 });
@@ -279,9 +280,15 @@ export class CartController extends Controller {
                 ) {
                     alert('Ваш заказ принят');
                     localStorage.removeItem('cart');
+                    document.querySelector('.overflow')?.remove();
                     updateCartInfo();
                     this.render();
-                    document.querySelector('.overflow')?.remove();
+                } else {
+                    for (let i = 0; i <= arrayResult.length; i++) {
+                        if (arrayResult[i].length < 2) {
+                            error[i].textContent = 'ERROR';
+                        }
+                    }
                 }
             });
         }
