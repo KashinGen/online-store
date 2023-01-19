@@ -1,16 +1,16 @@
-// .error{
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     align-self: center;
-//     height: 100vh;
-//     display: flex;
-//     flex-direction: column;
-//     &::after {
-//         content: 'Sorry, your way is not correct';
-//         margin-top: 15px;
-//     }
-// }
+.error404{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    &::after {
+        content: 'Sorry, your way is not correct';
+        margin-top: 15px;
+    }
+}
 
 .bth-error{
     font-size: 20px;

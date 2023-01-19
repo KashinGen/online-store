@@ -20,7 +20,7 @@ export class DetailController extends Controller {
         if (root instanceof HTMLElement) {
             this.setLoading(root);
             const data = await getProduct(id);
-            if (!data.id) {
+            if (!data) {
                 const divNotFound = document.createElement('div');
                 divNotFound.className = 'detail__not-found';
                 divNotFound.innerHTML = `Ой! Товар &nbsp;<span>${id}</span>&nbsp; не найден`;
