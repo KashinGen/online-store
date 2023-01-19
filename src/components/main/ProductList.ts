@@ -89,11 +89,9 @@ class ProductList extends Component {
                         }
                         if (btn) {
                             const index = CartModel.findIndex(product);
-                            if (index === -1) {
-                                const btnText = btn.querySelector('.product-card__add-btn-text');
-                                if (btnText) {
-                                    btnText.innerHTML = 'В корзине';
-                                }
+                            const btnText = btn.querySelector('.product-card__add-btn-text');
+                            if (btnText) {
+                                btnText.innerHTML = 'В корзине';
                             }
                         }
                     }
