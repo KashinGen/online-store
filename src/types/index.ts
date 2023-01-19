@@ -83,6 +83,8 @@ export interface Cart {
     cart: CartItem[];
     count: number;
     sum: number;
+    sumWithSale: number;
+    sale: number;
 }
 
 export interface State {
@@ -97,4 +99,10 @@ export interface State {
     selectedView: Option;
     isPriceChanged: boolean;
     isStockChanged: boolean;
+    cart: Cart;
+    limit: number;
+    currentPage: number;
+    allPages: number;
+    addedPromo: Promo[];
+    promo: Promo[];
 }

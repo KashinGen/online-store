@@ -1,4 +1,4 @@
-import { Filter, Product, ProductViewMode, State, Option, OrderSort, Cart } from '../types';
+import { Filter, Product, ProductViewMode, State, Option, OrderSort, Cart, Promo } from '../types';
 import CartModel from '../models/Cart';
 
 class Store implements State {
@@ -32,6 +32,23 @@ class Store implements State {
     isPriceChanged: boolean = false;
     isStockChanged: boolean = false;
     cart: Cart = CartModel;
+    limit: number = 3;
+    sale: number = 0;
+    currentPage: number = 1;
+    allPages: number = 1;
+    addedPromo: Promo[] = [];
+    promo: Promo[] = [
+        {
+            percents: 20,
+            label: 'RS School',
+            code: 'RS',
+        },
+        {
+            percents: 10,
+            label: 'КупиЧоХошь',
+            code: 'КупиЧоХошь',
+        },
+    ];
 }
 
 export default new Store();

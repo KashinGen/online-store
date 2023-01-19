@@ -5,14 +5,24 @@ class СartModel implements Cart {
     cart: CartItem[];
     count: number;
     sum: number;
+    sumWithSale: number;
+    sale: number;
     constructor() {
         this.cart = getCart();
         const { sum, count } = getCartCount(this.cart);
         this.count = count;
         this.sum = sum;
+        this.sumWithSale = 0;
+        this.sale = 0;
     }
-    updateCart() {
-        return 1;
+    removeFromCart(product: Product) {
+        const index = this.findIndex(product);
+        if (this.cart[index].count - 1 === 0) {
+            this.cart = [...this.cart.slice(0, index), ...this.cart.slice(index + 1)];
+        } else {
+            this.cart[index].count -= 1;
+        }
+        localStorage.setItem('cart', JSON.stringify(this.cart));
     }
 
     addToCart(product: Product) {
@@ -54,6 +64,13 @@ class СartModel implements Cart {
 
     findIndex(product: Product) {
         return this.cart.findIndex((item) => item.product.id === product.id);
+    }
+    getSale() {
+        return this.sale;
+    }
+    getSumWithSale() {
+        this.sumWithSale = this.sum - (this.sum * this.sale) / 100;
+        return this.sumWithSale;
     }
 }
 

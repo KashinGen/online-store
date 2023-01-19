@@ -1,42 +1,28 @@
 import CartItemComponent from '../components/CartItem';
+import { cartModel } from '../models/cartModel';
 import router from '../router';
 import { CartAction, CartItem, Controller, Promo } from '../types';
 import { getCart, setURLParams, updateCartInfo } from '../util';
+import { CartView } from '../view/cartView';
+import CartModel from '../models/Cart';
 
 export class CartController extends Controller {
-    cart: CartItem[] = [];
+    _view: CartView | null = null;
+    _model: cartModel;
     cartToShow: CartItem[] = [];
-    sum: number = 0;
-    count: number = 0;
-    limit: number = 3;
-    currentPage: number = 1;
-    allPages: number = 1;
-    addedPromo: Promo[] = [];
-    promo: Promo[] = [
-        {
-            percents: 20,
-            label: 'RS School',
-            code: 'RS',
-        },
-        {
-            percents: 10,
-            label: 'КупиЧоХошь',
-            code: 'КупиЧоХошь',
-        },
-    ];
+    constructor() {
+        super();
+        this._model = new cartModel();
+    }
 
     init() {
-        this.cart = getCart();
-        const { sum, count } = updateCartInfo();
-        this.sum = sum;
-        this.count = count;
-        this.limit = 3;
-        this.currentPage = 1;
-        this.allPages = 1;
         this.getCartToShow();
         this.getURLParams();
+        const root = document.querySelector('.cart__inner');
+        if (root instanceof HTMLElement) {
+            this._view = new CartView(this, root);
+        }
         this.render();
-        this.addedPromo = [];
         const isButOneClick = localStorage.getItem('buy-one-click');
         if (isButOneClick) {
             this.openModal();
@@ -47,26 +33,32 @@ export class CartController extends Controller {
         const searchParams = new URLSearchParams(window.location.search);
         const limit = searchParams.get('limit');
         const page = searchParams.get('page');
+        const cart = CartModel.getCart();
+        const allPages = this._model.getAllPages();
         if (limit) {
-            const selectedLimit = +limit <= this.cart.length && +limit >= 1 ? +limit : this.cart.length;
-            this.limit = selectedLimit;
+            const selectedLimit = +limit <= cart.length && +limit >= 1 ? +limit : cart.length;
+            this._model.setLimit(selectedLimit);
         }
         if (page) {
             let selectedPage = +page;
             if (selectedPage < 1) {
                 selectedPage = 1;
             }
-            if (selectedPage > this.allPages) {
-                selectedPage = this.allPages;
+            if (selectedPage > allPages) {
+                selectedPage = allPages;
             }
-            this.currentPage = selectedPage;
+            this._model.setCurrentPage(selectedPage);
         }
         this.getCartToShow();
     }
 
     getCartToShow() {
-        this.cartToShow = this.cart.slice((this.currentPage - 1) * this.limit, this.currentPage * this.limit);
-        this.allPages = Math.ceil(this.cart.length / this.limit);
+        const cart = CartModel.getCart();
+        const currentPage = this._model.getCurrentPage();
+        const limit = this._model.getLimit();
+        this.cartToShow = cart.slice((currentPage - 1) * limit, currentPage * limit);
+        const allPages = Math.ceil(cart.length / limit);
+        this._model.setAllPages(allPages);
     }
 
     openModal() {
@@ -326,320 +318,130 @@ export class CartController extends Controller {
             });
         }
     }
+
     render() {
-        const root = document.querySelector('.cart__inner');
-        if (root instanceof HTMLElement) {
-            let leftContainer = root.querySelector('.cart__left');
-            if (!(leftContainer instanceof HTMLElement)) {
-                leftContainer = document.createElement('div');
-                leftContainer.className = 'cart__left';
-            }
-            this.getCartToShow();
-            this.getSumAndCount();
-            if (this.cart.length !== 0) {
-                if (leftContainer instanceof HTMLElement) {
-                    this.renderCartControls(leftContainer);
-                    this.renderCartItems(leftContainer);
-                    root.append(leftContainer);
-                }
-                this.renderCartInfo(root);
-            } else {
-                this.renderEmpty(root);
-            }
+        this.getCartToShow();
+        this._view && this._view.render();
+    }
+    onPromoInputHandler(value: string) {
+        const promo = this._model.getPromo();
+        const index = promo.findIndex((promo) => promo.code === value);
+        if (this._view) {
+            this._view.renderFoundPromo(promo[index] ? promo[index] : null);
         }
     }
-    renderCartControls(root: HTMLElement) {
-        let cart_controls = document.querySelector('.cart__controls');
-        if (!(cart_controls instanceof HTMLElement)) {
-            cart_controls = document.createElement('div');
-            cart_controls.className = 'cart__controls';
+    onPromoAddHandler(promo: Promo) {
+        this._model.addPromo(promo);
+        if (this._view) {
+            this._view.renderCompletedPromo();
+            this._view.renderFoundPromo(null);
         }
-        cart_controls.innerHTML = '';
-        const title = document.createElement('h1');
-        title.className = 'cart__title';
-        title.innerHTML = 'Корзина';
-        const controlsContainer = document.createElement('div');
-        controlsContainer.className = 'cart__controls-container';
-        // лимит товара на странице
-        const limit = document.createElement('div');
-        limit.className = 'cart__limit';
-        const limitSpan = document.createElement('span');
-        limitSpan.innerHTML = 'Товаров на странице:';
-        const limitInput = document.createElement('input');
-        limitInput.className = 'cart__limit-number';
-        limitInput.type = 'number';
-        limitInput.min = '1';
-        limitInput.max = this.cart.length.toString();
-        limitInput.value = this.limit.toString();
-        limitInput.addEventListener('input', (e) => {
-            const target = e.target;
-            if (target instanceof HTMLInputElement) {
-                const value = target.value;
-                if (+value > this.cart.length) {
-                    target.value = this.cart.length.toString();
-                    this.limit = +value;
-                } else if (+value < 1) {
-                    target.value = '1';
-                    this.limit = 1;
-                } else {
-                    this.limit = +value;
-                }
-                let leftContainer = document.querySelector('.cart__left');
-                this.currentPage = 1;
-                this.getCartToShow();
-                setURLParams('page', this.currentPage.toString());
-                setURLParams('limit', this.limit.toString());
-                if (leftContainer instanceof HTMLElement) {
-                    this.renderCartItems(leftContainer);
-                }
-                this.currentPage = 1;
-                const currentPage = document.querySelector('.cart__pagination-wrapper span');
-                if (currentPage) {
-                    currentPage.innerHTML = this.currentPage.toString();
-                }
-            }
-        });
-        limit.append(limitSpan, limitInput);
-        // блок пагинации
-        const pagination = document.createElement('div');
-        pagination.className = 'cart__pagination';
-        const paginationWrapper = document.createElement('div');
-        paginationWrapper.className = 'cart__pagination-wrapper';
-        const paginationSpan = document.createElement('span');
-        paginationSpan.innerHTML = 'Страница: ';
-        const btnPrev = document.createElement('button');
-        btnPrev.innerHTML = '&lt;';
-        btnPrev.addEventListener('click', (e) => {
-            if (e.target && e.target instanceof HTMLButtonElement) {
-                if (this.currentPage === 1) return;
-                this.currentPage -= 1;
-                this.getCartToShow();
-                const currentPage = document.querySelector('.cart__pagination-wrapper span');
-                if (currentPage) {
-                    currentPage.innerHTML = this.currentPage.toString();
-                }
-                let leftContainer = document.querySelector('.cart__left');
-                if (leftContainer instanceof HTMLElement) {
-                    this.renderCartItems(leftContainer);
-                }
-                setURLParams('page', this.currentPage.toString());
-            }
-        });
-        const btnNext = document.createElement('button');
-        btnNext.innerHTML = '&gt;';
-        btnNext.addEventListener('click', (e) => {
-            if (e.target instanceof HTMLButtonElement) {
-                if (this.currentPage === this.allPages) {
-                    return;
-                }
-                this.currentPage += 1;
-                this.getCartToShow();
-                let leftContainer = document.querySelector('.cart__left');
-                const currentPage = document.querySelector('.cart__pagination-wrapper span');
-                if (currentPage) {
-                    currentPage.innerHTML = this.currentPage.toString();
-                }
-                if (leftContainer instanceof HTMLElement) {
-                    this.renderCartItems(leftContainer);
-                }
-                setURLParams('page', this.currentPage.toString());
-            }
-        });
-        const currentPage = document.createElement('span');
-        currentPage.innerHTML = this.currentPage.toString();
-        paginationWrapper.append(btnPrev, currentPage, btnNext);
-        pagination.append(paginationSpan, paginationWrapper);
-        controlsContainer.append(limit, pagination);
-        cart_controls.append(title, controlsContainer);
-        root.append(cart_controls);
-    }
-    renderCartItems(root: HTMLElement) {
-        let cart_list = document.querySelector('.cart__list');
-        if (!(cart_list instanceof HTMLElement)) {
-            cart_list = document.createElement('div');
-            cart_list.className = 'cart__list';
+        const input = document.querySelector('.cart__promo-input');
+        if (input instanceof HTMLInputElement) {
+            input.value = '';
         }
-        cart_list.innerHTML = '';
-        this.cartToShow.forEach((cart_item) => {
-            const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
-            const cartItemComponent = new CartItemComponent(cart_item, this.onChangeCartCount.bind(this), {
-                selector: cartItem,
-                template: '',
-            });
-            cart_list?.appendChild(cartItem);
-            cartItemComponent.render();
-        });
-        root.append(cart_list);
+        this.setSale();
     }
+    onPromoDeleteHandler(promo: Promo) {
+        this._model.removePromo(promo);
+        if (this._view) {
+            this._view.renderCompletedPromo();
+            this._view.renderFoundPromo(null);
+        }
+        this.setSale();
+    }
+
     onChangeCartCount(cart_item: CartItemComponent, action: CartAction) {
-        const index = this.cart.findIndex((item) => item.product.id === cart_item.cartItem.product.id);
+        const cart = CartModel.getCart();
+        const index = cart.findIndex((item) => item.product.id === cart_item.cartItem.product.id);
         if (index === -1) return;
         if (action === CartAction.DECREASE) {
-            if (this.cart[index].count - 1 === 0) {
-                this.cart = [...this.cart.slice(0, index), ...this.cart.slice(index + 1)];
-                this.getCartToShow();
-                if (this.cartToShow.length === 0) {
-                    if (this.currentPage > 1) {
-                        this.currentPage -= 1;
-                    }
+            CartModel.removeFromCart(cart[index].product);
+            this.getCartToShow();
+            updateCartInfo();
+            if (this.cartToShow.length === 0) {
+                const current = this._model.getCurrentPage();
+                if (current > 1) {
+                    this._model.setCurrentPage(current - 1);
                 }
-            } else {
-                this.cart[index].count -= 1;
             }
         }
         if (action === CartAction.INCREASE) {
-            if (this.cart[index].count + 1 > this.cart[index].product.stock) return;
-            this.cart[index].count += 1;
+            CartModel.addToCart(cart[index].product);
         }
-        localStorage.setItem('cart', JSON.stringify(this.cart));
-        this.render();
-        this.renderCompletedPromo();
+        this.getCartToShow();
+        if (this._view) {
+            this._view.render();
+            this._view.renderCompletedPromo();
+        }
         this.setSale();
     }
-    renderCartInfo(root: HTMLElement) {
-        let cartInfo = document.querySelector('.cart__info');
-        if (!(cartInfo instanceof HTMLElement)) {
-            cartInfo = document.createElement('div');
-            cartInfo.className = 'cart__info';
-        }
-        cartInfo.innerHTML = '';
-        // блок итоговой суммы
-        const sumContainer = document.createElement('div');
-        sumContainer.className = 'cart__total-sum';
-        sumContainer.innerHTML = `Общая сумма: <span>${this.sum}</span> €`;
-        // блок итогового количества
-        const countContainer = document.createElement('div');
-        countContainer.className = 'cart__total-count';
-        countContainer.innerHTML = `Количество: <span>${this.count}</span>`;
-        // блок введенных промо
-        const completedPromo = document.createElement('div');
-        completedPromo.className = 'cart__promo-completed';
-        const title = document.createElement('div');
-        title.className = 'cart__total-count';
-        title.innerHTML = 'Введенные промокоды:';
-        const list = document.createElement('ul');
-        completedPromo.append(title, list);
-        completedPromo.style.display = 'none';
-
-        // блок промокода
-        const promoContainer = document.createElement('div');
-        promoContainer.className = 'cart__promo-container';
-        const input = document.createElement('input');
-        input.className = 'cart__promo-input';
-        input.setAttribute('placeholder', 'Промокод');
-        input.addEventListener('input', (e) => {
-            const target = e.target;
-            if (target instanceof HTMLInputElement) {
-                const value = target.value;
-                const index = this.promo.findIndex((promo) => promo.code === value);
-                this.renderFoundPromo(this.promo[index] ? this.promo[index] : null);
+    onLimitInputHandler(value: string) {
+        const cart = CartModel.getCart();
+        const input = document.querySelector('.cart__limit-number');
+        if (+value > cart.length) {
+            value = cart.length.toString();
+            this._model.setLimit(+value);
+        } else if (+value < 1) {
+            if (input instanceof HTMLInputElement) {
+                input.value = '1';
             }
-        });
-        const promoTestInfo = document.createElement('div');
-        promoTestInfo.className = 'cart__promo-test';
-        promoTestInfo.innerHTML = 'Коды для теста: RS, КупиЧоХошь';
-        const foundPromo = document.createElement('div');
-        foundPromo.className = 'promo__list';
-        const content = document.createElement('div');
-        content.className = 'promo__found-list';
-        foundPromo.append(content);
-        promoContainer.append(completedPromo, input, promoTestInfo, foundPromo);
-        // блок с кнопкой
-        const btnContainer = document.createElement('div');
-        btnContainer.className = 'cart__btn-container';
-        const btnBuy = document.createElement('button');
-        btnBuy.innerHTML = 'Оформить заказ';
-        btnBuy.addEventListener('click', () => this.openModal());
-        btnContainer.appendChild(btnBuy);
-        cartInfo.append(sumContainer, countContainer, promoContainer, btnContainer);
-        root.append(cartInfo);
-    }
-    renderEmpty(root: HTMLElement) {
-        root.innerHTML = '';
-        const div = document.createElement('div');
-        div.className = 'cart__empty';
-        div.innerHTML = 'Ваша корзина пуста!';
-        root.append(div);
-    }
-
-    renderFoundPromo(promo: Promo | null) {
-        const root = document.querySelector('.promo__found-list');
-        if (!root) return;
-        root.innerHTML = '';
-        if (!promo) return;
-        const div = document.createElement('div');
-        div.className = 'promo-item';
-        const content = document.createElement('div');
-        content.innerHTML = `<div class="promo">
-                                <span>${promo.label}</span>
-                                -
-                                <span>${promo.percents} %</span>
-                            </div>`;
-        const item = this.addedPromo.find((item) => promo.code === item.code);
-        if (!item) {
-            const btnAdd = document.createElement('button');
-            btnAdd.innerHTML = '+';
-            btnAdd.addEventListener('click', (e) => {
-                const isAdded = this.addedPromo.findIndex((item) => item.code === promo.code) !== -1;
-                if (!isAdded) {
-                    this.addedPromo.push(promo);
-                    this.renderCompletedPromo();
-                    this.renderFoundPromo(null);
-                    const input = document.querySelector('.cart__promo-input');
-                    if (input instanceof HTMLInputElement) {
-                        input.value = '';
-                    }
-                    this.setSale();
-                }
-            });
-            div.append(content, btnAdd);
+            this._model.setLimit(1);
         } else {
-            div.append(content);
+            this._model.setLimit(+value);
         }
-
-        if (root) {
-            root.append(div);
+        let leftContainer = document.querySelector('.cart__left');
+        this._model.setCurrentPage(1);
+        this.getCartToShow();
+        const current = this._model.getCurrentPage();
+        const limit = this._model.getLimit();
+        setURLParams('page', current.toString());
+        setURLParams('limit', limit.toString());
+        if (leftContainer instanceof HTMLElement && this._view) {
+            this._view.renderCartItems(leftContainer);
+        }
+        const currentPage = document.querySelector('.cart__pagination-wrapper span');
+        if (currentPage) {
+            currentPage.innerHTML = current.toString();
         }
     }
-    renderCompletedPromo() {
-        const root = document.querySelector('.cart__promo-completed');
-        if (root instanceof HTMLElement) {
-            root.style.display = this.addedPromo.length ? 'block' : 'none';
+    onPrevClickHandler() {
+        const currentPage = this._model.getCurrentPage();
+        if (currentPage === 1) return;
+        this._model.setCurrentPage(currentPage - 1);
+        this.getCartToShow();
+        const current = document.querySelector('.cart__pagination-wrapper span');
+        if (current) {
+            current.innerHTML = this._model.getCurrentPage().toString();
         }
-        const list = document.querySelector('.cart__promo-completed ul');
-        if (list) {
-            const fragment = new DocumentFragment();
-            this.addedPromo.forEach((promo) => {
-                const li = document.createElement('li');
-                li.className = 'promo-item';
-                const content = document.createElement('div');
-                content.innerHTML = `
-                                        <span>${promo.label}</span>
-                                        -
-                                        <span>${promo.percents} %</span>`;
-                const btnDelete = document.createElement('button');
-                btnDelete.innerHTML = '-';
-                btnDelete.addEventListener('click', (e) => {
-                    const index = this.addedPromo.findIndex((item) => item.code === promo.code);
-                    if (index !== -1) {
-                        this.addedPromo = [...this.addedPromo.slice(0, index), ...this.addedPromo.slice(index + 1)];
-                        this.renderCompletedPromo();
-                        this.renderFoundPromo(null);
-                        this.setSale();
-                    }
-                });
-                li.append(content, btnDelete);
-                fragment.append(li);
-            });
-            list.innerHTML = '';
-            list.append(fragment);
+        let leftContainer = document.querySelector('.cart__left');
+        if (leftContainer instanceof HTMLElement && this._view) {
+            this._view.renderCartItems(leftContainer);
         }
+        setURLParams('page', this._model.getCurrentPage().toString());
+    }
+    onNextBtnClickHandler() {
+        const currentPage = this._model.getCurrentPage();
+        const allPages = this._model.getAllPages();
+        if (currentPage === allPages) {
+            return;
+        }
+        this._model.setCurrentPage(currentPage + 1);
+        this.getCartToShow();
+        let leftContainer = document.querySelector('.cart__left');
+        const current = document.querySelector('.cart__pagination-wrapper span');
+        if (current) {
+            current.innerHTML = this._model.getCurrentPage().toString();
+        }
+        if (leftContainer instanceof HTMLElement && this._view) {
+            this._view.renderCartItems(leftContainer);
+        }
+        setURLParams('page', this._model.getCurrentPage().toString());
     }
     setSale() {
-        const sale = this.addedPromo.reduce((acc, item) => {
-            return (acc += item.percents);
-        }, 0);
+        this._model.setSale();
+        const sale = CartModel.getSale();
+        const sumWithSale = CartModel.getSumWithSale();
         const infoContainer = document.querySelector('.cart__info');
         if (infoContainer) {
             const oldPrice = infoContainer.querySelector('.cart__total-sum');
@@ -653,15 +455,11 @@ export class CartController extends Controller {
                 if (!newPriceContainer && sale !== 0) {
                     newPriceContainer = document.createElement('div');
                     newPriceContainer.classList.add('cart__total-sum', 'cart__total-sum--new');
-                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${
-                        this.sum - (this.sum * sale) / 100
-                    }</span> €`;
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${sumWithSale}</span> €`;
                     infoContainer.prepend(newPriceContainer);
                 }
                 if (newPriceContainer) {
-                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${
-                        this.sum - (this.sum * sale) / 100
-                    }</span> €`;
+                    newPriceContainer.innerHTML = `Сумма со скидкой: <span>${sumWithSale}</span> €`;
                     if (sale === 0) {
                         newPriceContainer.remove();
                         infoContainer.removeChild(newPriceContainer);
@@ -669,10 +467,5 @@ export class CartController extends Controller {
                 }
             }
         }
-    }
-    getSumAndCount() {
-        const { sum, count } = updateCartInfo();
-        this.sum = sum;
-        this.count = count;
     }
 }
