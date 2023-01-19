@@ -1,7 +1,7 @@
 import { ConfigComponent } from '../types';
 
 export class Component {
-    selector: HTMLElement;
+    selector: HTMLElement | null;
     template: string;
     constructor(config: ConfigComponent) {
         this.selector = config.selector;

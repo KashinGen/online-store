@@ -14,5 +14,12 @@ class InputSearch extends Component {
             </div>`;
         super.render();
     }
+    setSearchValue(value: string) {
+        if (!this.selector) return;
+        const input = this.selector.querySelector('.input-search__input');
+        if (input instanceof HTMLInputElement) {
+            input.value = value;
+        }
+    }
 }
 export default InputSearch;

@@ -36,32 +36,36 @@ class Select extends Component {
         super.render();
         if (this.eventInited) return;
         this.eventInited = true;
-        this.selector.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target && target instanceof HTMLElement) {
-                const parent = target.closest('.select');
-                if (target instanceof HTMLLIElement) {
-                    if (target.dataset.value) {
-                        const chosen = JSON.parse(target.dataset.value);
-                        const selected = this.options.find(
-                            (option) => option.value === chosen.value && option.order === chosen.order
-                        );
-                        this.callback(this, selected);
-                    }
-                    setTimeout(() => {
-                        target.closest('.select')?.classList.remove('shown');
-                    }, 200);
-                    return;
-                }
-                if (target && target instanceof HTMLDivElement) {
-                    if (target.classList.contains('select__selected')) {
-                        target.closest('.select')?.classList.toggle('shown');
+        this.selector &&
+            this.selector.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target && target instanceof HTMLElement) {
+                    const parent = target.closest('.select');
+                    if (target instanceof HTMLLIElement) {
+                        if (target.dataset.value) {
+                            const chosen = JSON.parse(target.dataset.value);
+                            const selected = this.options.find(
+                                (option) => option.value === chosen.value && option.order === chosen.order
+                            );
+                            if (selected) {
+                                this.callback(selected);
+                                this.changeSelection(selected);
+                            }
+                        }
+                        setTimeout(() => {
+                            target.closest('.select')?.classList.remove('shown');
+                        }, 200);
                         return;
                     }
+                    if (target && target instanceof HTMLDivElement) {
+                        if (target.classList.contains('select__selected')) {
+                            target.closest('.select')?.classList.toggle('shown');
+                            return;
+                        }
+                    }
+                    target.closest('.select')?.classList.remove('shown');
                 }
-                target.closest('.select')?.classList.remove('shown');
-            }
-        });
+            });
         document.addEventListener('click', (e) => {
             const target = e.target;
             if (target && target instanceof HTMLElement) {

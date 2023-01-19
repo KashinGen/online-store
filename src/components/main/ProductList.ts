@@ -2,7 +2,7 @@ import { Component } from '../../core/component';
 import { CartItem, ConfigComponent } from '../../types';
 import { Product } from '../../types/index';
 import ProductItemComponent from './ProductItemComponent';
-import { updateCartInfo } from '../../util';
+import CartModel from '../../models/Cart';
 
 class ProductList extends Component {
     constructor(config: ConfigComponent) {
@@ -13,15 +13,15 @@ class ProductList extends Component {
         super.render();
     }
 
-    renderProduct(list: Product[], cart: CartItem[]) {
+    renderProduct(list: Product[]) {
+        if (!this.selector) return;
         this.selector.innerHTML = '';
         if (list.length !== 0) {
             const fragment = new DocumentFragment();
             list.forEach((product) => {
                 const card = document.createElement('div');
                 card.classList.add('product-card');
-                const index = cart.findIndex((item: CartItem) => item.product.id === product.id);
-                const isInCart = index !== -1;
+                const isInCart = CartModel.isAddedToCart(product);
                 const productComponent = new ProductItemComponent(product, {
                     selector: card,
                     template: `<a href="/detail/${product.id}" target='_blank' class="router-link">
@@ -84,15 +84,17 @@ class ProductList extends Component {
                                 product: product,
                             },
                         });
-                        this.selector.dispatchEvent(c_event);
+                        if (this.selector) {
+                            this.selector.dispatchEvent(c_event);
+                        }
                         if (btn) {
+                            const index = CartModel.findIndex(product);
                             if (index === -1) {
                                 const btnText = btn.querySelector('.product-card__add-btn-text');
                                 if (btnText) {
                                     btnText.innerHTML = 'В корзине';
                                 }
                             }
-                            updateCartInfo();
                         }
                     }
                 };

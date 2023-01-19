@@ -1,7 +1,7 @@
 import CartItemComponent from '../components/CartItem';
 import router from '../router';
 import { CartAction, CartItem, Controller, Promo } from '../types';
-import { enforceFormat, formatToPhone, getCart, setURLParams, updateCartInfo } from '../util';
+import { getCart, setURLParams, updateCartInfo } from '../util';
 
 export class CartController extends Controller {
     cart: CartItem[] = [];
@@ -305,7 +305,6 @@ export class CartController extends Controller {
                         router.push('/');
                         document.querySelector('.overflow')?.remove();
                     }, 3000);
-
                 } else {
                     for (let i = 0; i <= arrayResult.length; i++) {
                         if (arrayResult[i].length < 2) {

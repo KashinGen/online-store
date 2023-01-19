@@ -13,9 +13,7 @@ class FilterComponent extends Component {
         this.filterData = filterData;
         this.products = products;
     }
-
     render() {
-        const doc = document.querySelectorAll('name');
         const brandsFilterBlock = document.querySelector('.filter-item.brands');
         if (brandsFilterBlock) {
             this.renderFilterList(this.filterData.brands, brandsFilterBlock, FilterCheckboxType.BRAND);
@@ -96,7 +94,9 @@ class FilterComponent extends Component {
                 value: val,
             },
         });
-        this.selector.dispatchEvent(c_event);
+        if (this.selector) {
+            this.selector.dispatchEvent(c_event);
+        }
     }
     onStockChange(val: [number, number]) {
         let c_event = new CustomEvent('stockChanged', {
@@ -104,7 +104,9 @@ class FilterComponent extends Component {
                 value: val,
             },
         });
-        this.selector.dispatchEvent(c_event);
+        if (this.selector) {
+            this.selector.dispatchEvent(c_event);
+        }
     }
 }
 export default FilterComponent;

@@ -43,6 +43,7 @@ class RangeSlider extends Component {
             return;
         }
         this.eventsInited = true;
+        if (!this.selector) return;
         let sliderOne = this.selector.querySelector('.range__input-min');
         let sliderTwo = this.selector.querySelector('.range__input-max');
         let displayValOne = this.selector.querySelector('.range__value-min');

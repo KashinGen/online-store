@@ -1,4 +1,4 @@
-import { Component } from '../core/component';
+import { Component } from '../core';
 import { CartAction, ConfigComponent } from '../types';
 import { CartItem } from '../types/index';
 
@@ -66,20 +66,21 @@ class CartItemComponent extends Component {
                         </div>
                         `),
             super.render();
-        this.selector.addEventListener('click', (e) => {
-            const target = e.target;
-            if (target instanceof HTMLButtonElement) {
-                const content = target.textContent;
-                if (content && content === '+') {
-                    this.callback(this, CartAction.INCREASE);
-                    return;
+        this.selector &&
+            this.selector.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target instanceof HTMLButtonElement) {
+                    const content = target.textContent;
+                    if (content && content === '+') {
+                        this.callback(this, CartAction.INCREASE);
+                        return;
+                    }
+                    if (content && content === '-') {
+                        this.callback(this, CartAction.DECREASE);
+                        return;
+                    }
                 }
-                if (content && content === '-') {
-                    this.callback(this, CartAction.DECREASE);
-                    return;
-                }
-            }
-        });
+            });
     }
 }
 export default CartItemComponent;

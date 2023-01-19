@@ -17,7 +17,7 @@ export abstract class Controller {
 }
 
 export interface ConfigComponent {
-    selector: HTMLElement;
+    selector: HTMLElement | null;
     template: string;
 }
 
@@ -77,4 +77,24 @@ export interface Promo {
     percents: number;
     label: string;
     code: string;
+}
+
+export interface Cart {
+    cart: CartItem[];
+    count: number;
+    sum: number;
+}
+
+export interface State {
+    filter: Filter;
+    filterData: Filter;
+    products: Product[];
+    filteredProducts: Product[];
+    search: string;
+    optionsSort: Option[];
+    selected: Option;
+    optionsView: Option[];
+    selectedView: Option;
+    isPriceChanged: boolean;
+    isStockChanged: boolean;
 }

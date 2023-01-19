@@ -19,7 +19,7 @@ class Checkbox extends Component {
                 <span class="checkmark"></span>${this.props.label}
             </label>`;
         super.render();
-        const input = this.selector.querySelector('input[type=checkbox]');
+        const input = this.selector && this.selector.querySelector('input[type=checkbox]');
         if (input instanceof HTMLInputElement) {
             input.addEventListener('change', (e) => {
                 let c_event = new CustomEvent('checkBoxEvent', {
