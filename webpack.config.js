@@ -15,7 +15,6 @@ module.exports = {
 		port: 3000,
 		historyApiFallback: true,
 		contentBase: "./src",
-
 	},
     entry: path.resolve(__dirname, './src/index.ts'),
 	output: {
@@ -24,7 +23,7 @@ module.exports = {
 		path: path.resolve(__dirname, 'dist'),
 	},
     resolve: {
-        extensions: ['.ts', '.js', 'd.ts'],
+        extensions: ['.ts', '.js'],
     },
 	plugins: [
         new HtmlWebpackPlugin({
@@ -38,7 +37,11 @@ module.exports = {
 	],
 	module: {
 		rules: [
-            { test: /\.ts$/i, use: 'ts-loader' },
+            {
+				test: /\.ts$/i,
+				use: 'ts-loader',
+				exclude: /node_modules/,
+			},
 			{
 				test: /\.html$/i,
 				loader: 'html-loader',
