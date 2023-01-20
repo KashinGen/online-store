@@ -26,7 +26,7 @@ export class CartController extends Controller {
         }
         this.render();
         const isButOneClick = localStorage.getItem('buy-one-click');
-        const modalRoot = document.querySelector('.container');
+        const modalRoot = document.querySelector('.modal');
         if (modalRoot instanceof HTMLElement) {
             this._orderModal = new OrderModal(
                 this.onSubmitHandler.bind(this),
@@ -78,12 +78,12 @@ export class CartController extends Controller {
         localStorage.removeItem('cart');
         this._orderModal && this._orderModal.hide();
         document.querySelector('.overflow')?.remove();
-        updateCartInfo();
-        this.render();
         setTimeout(() => {
-            router.push('/');
             this._orderModal && this._orderModal.hide();
             this._model.clearCart();
+            this.render();
+            updateCartInfo();
+            router.push('/');
         }, 3000);
     }
     openModal() {

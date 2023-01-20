@@ -30,12 +30,16 @@ export function updateCartInfo() {
         cart_sum.innerHTML = sum.toString();
     }
     const cart_icon = document.querySelector('.header__cart-link');
+    console.log(cart_icon, cart_sum);
+    
     if (cart_icon) {
         cart_icon.setAttribute('data-count', count.toString());
         if (count > 0) {
             cart_icon.classList.add('on');
         }
     }
+    console.log(cart_icon, cart_sum);
+
     return { sum, count };
 }
 
@@ -56,8 +60,8 @@ export function setURLParams(param: string, value: string): void {
 }
 
 export function checkValidName(value: string): boolean {
-    const str = value.split(' ');
-    return str.length > 2 &&  str[0].length < 3 && str[1].length < 3;
+    const str = value.split(' ');    
+    return str.length >= 2 && str[0].length >= 3 && str[1].length >= 3;
 }
 
 export function checkValidPhone(value: string): boolean {
@@ -77,7 +81,9 @@ export function checkValidAddress(value: string): boolean {
 
 export function checkValidEmail(value: string): boolean {
     const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
-    return value.length === 0 && EMAIL_REGEXP.test(value.toString());
+    console.log(EMAIL_REGEXP.test(value.toString()));
+    
+    return value.length != 0 && EMAIL_REGEXP.test(value.toString());
 }
 
 export function getCardCompany(value: string): string {
