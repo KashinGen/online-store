@@ -1,6 +1,15 @@
 import { Component } from '../core/component';
 import { ConfigComponent } from '../types';
-import { checkValidAddress, checkValidCardNumber, checkValidEmail, checkValidName, checkValidPhone, getCardCompany, checkValidCardData, checkValidCVV } from '../util';
+import {
+    checkValidAddress,
+    checkValidCardNumber,
+    checkValidEmail,
+    checkValidName,
+    checkValidPhone,
+    getCardCompany,
+    checkValidCardData,
+    checkValidCVV,
+} from '../util';
 
 class OrderModal extends Component {
     _isEventsInited: boolean = false;
@@ -11,7 +20,7 @@ class OrderModal extends Component {
     }
 
     render() {
-            const blockCreditCard: string = `
+        const blockCreditCard: string = `
             <div>
                 <div>
                     <span class='type-card'></span>
@@ -28,7 +37,7 @@ class OrderModal extends Component {
                     <span class='error error-code'></span>
                 </div>
             </div>`;
-            this.template = `
+        this.template = `
                 <div class='overflow'>
                     <div class='main-buy-now'>
                     <h2>Personal details</h2>
@@ -74,7 +83,7 @@ class OrderModal extends Component {
                     const errorName = document.querySelector('.error-name');
                     if (!errorName) return;
                     const valid = checkValidName(e.target.value);
-                    errorName.innerHTML = !valid ? 'ERROR' : '';                    
+                    errorName.innerHTML = !valid ? 'ERROR' : '';
                 }
             });
         }
@@ -134,7 +143,7 @@ class OrderModal extends Component {
                 if (e.target instanceof HTMLInputElement) {
                     const str = e.target.value;
                     const errorCardData = document.querySelector('.error-valid');
-                    if (!errorCardData) return;   
+                    if (!errorCardData) return;
                     const value = str.length > 2 ? str.slice(0, 2) + str.slice(3) : str;
                     if (isNaN(+value)) {
                         cardData.value = str.slice(0, str.length - 1);
@@ -143,7 +152,7 @@ class OrderModal extends Component {
                         cardData.value += '/';
                     }
                     if (!errorCardData) return;
-                    const valid = checkValidCardData(str);                        
+                    const valid = checkValidCardData(str);
                     errorCardData.innerHTML = !valid ? 'ERROR' : '';
                 }
             });
@@ -172,7 +181,7 @@ class OrderModal extends Component {
         if (bthSubmit && error) {
             bthSubmit.addEventListener('click', () => {
                 const arrayResult: String[] = [];
-                const event = new Event('input', {bubbles:true});
+                const event = new Event('input', { bubbles: true });
                 if (name instanceof HTMLInputElement) {
                     name.dispatchEvent(event);
                 }
@@ -235,7 +244,6 @@ class OrderModal extends Component {
     hide() {
         const overflow: HTMLDivElement | null = document.querySelector('.overflow');
         overflow && overflow.remove();
-
     }
 }
 export default OrderModal;

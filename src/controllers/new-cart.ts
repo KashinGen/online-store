@@ -28,20 +28,17 @@ export class CartController extends Controller {
         const isButOneClick = localStorage.getItem('buy-one-click');
         const modalRoot = document.querySelector('.modal');
         if (modalRoot instanceof HTMLElement) {
-            this._orderModal = new OrderModal(
-                this.onSubmitHandler.bind(this),
-                {
-                    selector: modalRoot,
-                    template: '',
-                }
-            )
+            this._orderModal = new OrderModal(this.onSubmitHandler.bind(this), {
+                selector: modalRoot,
+                template: '',
+            });
         }
         if (isButOneClick) {
             this.openModal();
             localStorage.removeItem('buy-one-click');
         }
-
     }
+
     getURLParams(): void {
         const searchParams = new URLSearchParams(window.location.search);
         const limit = searchParams.get('limit');
@@ -86,6 +83,7 @@ export class CartController extends Controller {
             router.push('/');
         }, 3000);
     }
+
     openModal() {
         this._orderModal && this._orderModal.render();
     }
@@ -94,6 +92,7 @@ export class CartController extends Controller {
         this.getCartToShow();
         this._view && this._view.render();
     }
+
     onPromoInputHandler(value: string) {
         const promo = this._model.getPromo();
         const index = promo.findIndex((promo) => promo.code === value);
@@ -101,6 +100,7 @@ export class CartController extends Controller {
             this._view.renderFoundPromo(promo[index] ? promo[index] : null);
         }
     }
+
     onPromoAddHandler(promo: Promo) {
         this._model.addPromo(promo);
         if (this._view) {
@@ -113,6 +113,7 @@ export class CartController extends Controller {
         }
         this.setSale();
     }
+
     onPromoDeleteHandler(promo: Promo) {
         this._model.removePromo(promo);
         if (this._view) {
@@ -147,6 +148,7 @@ export class CartController extends Controller {
         }
         this.setSale();
     }
+
     onLimitInputHandler(value: string) {
         const cart = CartModel.getCart();
         const input = document.querySelector('.cart__limit-number');
@@ -176,6 +178,7 @@ export class CartController extends Controller {
             currentPage.innerHTML = current.toString();
         }
     }
+
     onPrevClickHandler() {
         const currentPage = this._model.getCurrentPage();
         if (currentPage === 1) return;
@@ -191,6 +194,7 @@ export class CartController extends Controller {
         }
         setURLParams('page', this._model.getCurrentPage().toString());
     }
+
     onNextBtnClickHandler() {
         const currentPage = this._model.getCurrentPage();
         const allPages = this._model.getAllPages();
@@ -209,6 +213,7 @@ export class CartController extends Controller {
         }
         setURLParams('page', this._model.getCurrentPage().toString());
     }
+
     setSale() {
         this._model.setSale();
         const sale = CartModel.getSale();

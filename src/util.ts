@@ -29,7 +29,7 @@ export function updateCartInfo() {
     if (cart_sum) {
         cart_sum.innerHTML = sum.toString();
     }
-    const cart_icon = document.querySelector('.header__cart-link');    
+    const cart_icon = document.querySelector('.header__cart-link');
     if (cart_icon) {
         cart_icon.setAttribute('data-count', count.toString());
         if (count > 0) {
@@ -59,7 +59,7 @@ export function setURLParams(param: string, value: string): void {
 }
 
 export function checkValidName(value: string): boolean {
-    const str = value.split(' ');    
+    const str = value.split(' ');
     return str.length >= 2 && str[0].length >= 3 && str[1].length >= 3;
 }
 
@@ -101,7 +101,7 @@ export function getCardCompany(value: string): string {
 }
 
 export function checkValidCardNumber(value: string): boolean {
-    const valid = value.split('').filter((item) =>+item).length === 16
+    const valid = value.split('').filter((item) => +item).length === 16;
     return valid;
 }
 
@@ -109,8 +109,7 @@ export function checkValidCardData(value: string): boolean {
     const month = +value.slice(0, 2) <= 12 && +value.slice(0, 2) != 0;
     const year = +value.slice(3);
     const yearNow = new Date().getFullYear().toString().slice(2);
-
-    return value.length > 4 && month  && year >= +yearNow;
+    return value.length > 4 && month && year >= +yearNow;
 }
 
 export function checkValidCVV(value: string): boolean {
