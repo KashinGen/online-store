@@ -51,4 +51,11 @@ export class cartModel {
         }
         this.setSale();
     }
+    clearCart() {
+        this._state.cart.count = 0;
+        this._state.cart.sale = 0;
+        this._state.cart.sumWithSale = 0;
+        this._state.cart.sum = 0;
+        this._state.cart.cart = [];
+    }
 }

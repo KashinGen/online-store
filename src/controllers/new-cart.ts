@@ -82,7 +82,8 @@ export class CartController extends Controller {
         this.render();
         setTimeout(() => {
             router.push('/');
-            document.querySelector('.overflow')?.remove();
+            this._orderModal && this._orderModal.hide();
+            this._model.clearCart();
         }, 3000);
     }
     openModal() {
