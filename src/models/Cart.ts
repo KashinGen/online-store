@@ -23,12 +23,15 @@ class СartModel implements Cart {
             this.cart[index].count -= 1;
         }
         localStorage.setItem('cart', JSON.stringify(this.cart));
+        const { sum, count } = getCartCount(this.cart);
+        this.count = count;
+        this.sum = sum;
     }
 
     addToCart(product: Product) {
         const index = this.findIndex(product);
         if (index !== -1) {
-            if (this.cart[index].product.stock > this.cart[index].count + 1) {
+            if (this.cart[index].product.stock >= this.cart[index].count + 1) {
                 this.cart[index].count++;
             }
         } else {
@@ -37,6 +40,9 @@ class СartModel implements Cart {
                 count: 1,
             });
         }
+        const { sum, count } = getCartCount(this.cart);
+        this.count = count;
+        this.sum = sum;
         localStorage.setItem('cart', JSON.stringify(this.cart));
     }
 

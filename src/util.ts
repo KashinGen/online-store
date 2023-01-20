@@ -29,24 +29,23 @@ export function updateCartInfo() {
     if (cart_sum) {
         cart_sum.innerHTML = sum.toString();
     }
-    const cart_icon = document.querySelector('.header__cart-link');
-    console.log(cart_icon, cart_sum);
-    
+    const cart_icon = document.querySelector('.header__cart-link');    
     if (cart_icon) {
         cart_icon.setAttribute('data-count', count.toString());
         if (count > 0) {
             cart_icon.classList.add('on');
         }
     }
-    console.log(cart_icon, cart_sum);
-
     return { sum, count };
 }
 
 export function getCart() {
-    const cartJSON = localStorage.getItem('cart');
-    const cart = cartJSON ? JSON.parse(cartJSON) : [];
-    return cart;
+    if (localStorage) {
+        const cartJSON = localStorage.getItem('cart');
+        const cart = cartJSON ? JSON.parse(cartJSON) : [];
+        return cart;
+    }
+    return [];
 }
 
 export function setURLParams(param: string, value: string): void {
@@ -81,8 +80,6 @@ export function checkValidAddress(value: string): boolean {
 
 export function checkValidEmail(value: string): boolean {
     const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
-    console.log(EMAIL_REGEXP.test(value.toString()));
-    
     return value.length != 0 && EMAIL_REGEXP.test(value.toString());
 }
 
@@ -104,14 +101,16 @@ export function getCardCompany(value: string): string {
 }
 
 export function checkValidCardNumber(value: string): boolean {
-    const str = value.split('');
-    return str.length > 0 && str.length < 16
+    const valid = value.split('').filter((item) =>+item).length === 16
+    return valid;
 }
 
 export function checkValidCardData(value: string): boolean {
     const month = +value.slice(0, 2) <= 12 && +value.slice(0, 2) != 0;
-    const year = +value.slice(3) != 0;
-    return value.length > 4 && month && year
+    const year = +value.slice(3);
+    const yearNow = new Date().getFullYear().toString().slice(2);
+
+    return value.length > 4 && month  && year >= +yearNow;
 }
 
 export function checkValidCVV(value: string): boolean {
