@@ -54,3 +54,60 @@ export function setURLParams(param: string, value: string): void {
     }
     history.pushState(null, '', url);
 }
+
+export function checkValidName(value: string): boolean {
+    const str = value.split(' ');
+    return str.length > 2 &&  str[0].length < 3 && str[1].length < 3;
+}
+
+export function checkValidPhone(value: string): boolean {
+    const phoneAllowed = '+0123456789';
+    let valid = value.split('').every((char) => phoneAllowed.includes(char));
+    if (value[0] !== '+' || value.length < 10) {
+        valid = false;
+    }
+    return valid;
+}
+
+export function checkValidAddress(value: string): boolean {
+    const str = value.trim().split(' ');
+    const isTrue = str.every((el) => el.length > 2);
+    return str.length >= 3 && isTrue;
+}
+
+export function checkValidEmail(value: string): boolean {
+    const EMAIL_REGEXP = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/iu;
+    return value.length === 0 && EMAIL_REGEXP.test(value.toString());
+}
+
+export function getCardCompany(value: string): string {
+    const str = value.split('');
+    if (str) {
+        switch (str[0]) {
+            case '3':
+                return 'Maestro';
+            case '4':
+                return 'Visa';
+            case '5':
+                return 'MasterCard';
+            default:
+                return '';
+        }
+    }
+    return '';
+}
+
+export function checkValidCardNumber(value: string): boolean {
+    const str = value.split('');
+    return str.length > 0 && str.length < 16
+}
+
+export function checkValidCardData(value: string): boolean {
+    const month = +value.slice(0, 2) <= 12 && +value.slice(0, 2) != 0;
+    const year = +value.slice(3) != 0;
+    return value.length > 4 && month && year
+}
+
+export function checkValidCVV(value: string): boolean {
+    return value.length === 3;
+}
