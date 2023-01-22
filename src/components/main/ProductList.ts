@@ -1,0 +1,111 @@
+import { Component } from '../../core/component';
+import { CartItem, ConfigComponent } from '../../types';
+import { Product } from '../../types/index';
+import ProductItemComponent from './ProductItemComponent';
+import CartModel from '../../models/Cart';
+
+class ProductList extends Component {
+    constructor(config: ConfigComponent) {
+        super(config);
+    }
+
+    render() {
+        super.render();
+    }
+
+    renderProduct(list: Product[]) {
+        if (!this.selector) return;
+        this.selector.innerHTML = '';
+        if (list.length !== 0) {
+            const fragment = new DocumentFragment();
+            list.forEach((product) => {
+                const card = document.createElement('div');
+                card.classList.add('product-card');
+                const isInCart = CartModel.isAddedToCart(product);
+                const productComponent = new ProductItemComponent(product, {
+                    selector: card,
+                    template: `<a href="/detail/${product.id}" target='_blank' class="router-link">
+                        <div class='product-card__img-wrapper'>
+                            <div class="product-card__img" style="background: url('${
+                                product.thumbnail
+                            }') center/cover"></div>
+                        </div>
+                    </a>
+                    <div class="product-card__content">
+                        <div class="product-card__reviews-container">
+                            <div class="product-card__rating ${product.rating >= 4.5 ? 'blue' : ''}">
+                                <span class='product-card__rating-star'></span>
+                                <span class='product-card__rating-number'>${product.rating.toFixed(1)}</span>
+                            </div>
+                            <div class="product-card__price">${product.price} €</div>
+                        </div>
+                        <a href="/detail/${product.id}" target='_blank' class="router-link product-card__name">
+                            ${product.title}
+                        </a>
+                        <ul class="product-card__info">
+                            <li>
+                                <span>Бренд</span>
+                                <span></span>
+                                <span>${product.brand}</span>
+                            </li>
+                            <li>
+                                <span>Категория</span>
+                                <span></span>
+                                <span>${product.category}</span>
+                            </li>
+                            <li>
+                                <span>В наличии</span>
+                                <span></span>
+                                <span>${product.stock} шт.</span>
+                            </li>
+                        </ul>
+                        <div style='flex: 1 1 0%'></div>
+                    </div>
+                    <button class='product-card__add-btn'>
+                        <span class='product-card__add-btn-text'>${isInCart ? 'В корзине' : 'В корзину'}</span>
+                        <span class='product-card__add-btn-icon'></span>
+                    </button>
+                    `,
+                });
+                fragment.append(card);
+                productComponent.render();
+                const btnAdd = card.querySelector('.product-card__add-btn');
+                if (!(btnAdd instanceof HTMLButtonElement)) return;
+                btnAdd.onclick = (e) => {
+                    e.preventDefault();
+                    const target = e.target;
+                    if (target instanceof HTMLElement) {
+                        const btn = target.closest('.product-card__add-btn');
+                        if (!btn) {
+                            if (!(target instanceof HTMLButtonElement)) return;
+                        }
+                        let c_event = new CustomEvent('build', {
+                            detail: {
+                                product: product,
+                            },
+                        });
+                        if (this.selector) {
+                            this.selector.dispatchEvent(c_event);
+                        }
+                        if (btn) {
+                            const index = CartModel.findIndex(product);
+                            const btnText = btn.querySelector('.product-card__add-btn-text');
+                            if (btnText) {
+                                btnText.innerHTML = 'В корзине';
+                            }
+                        }
+                    }
+                };
+            });
+            this.selector.innerHTML = '';
+            this.selector.append(fragment);
+        } else {
+            const notFoundWrapper = document.createElement('div');
+            notFoundWrapper.className = 'main__not-found';
+            notFoundWrapper.innerHTML = 'Ой, сори, мы не нашли товаров :(';
+            this.selector.innerHTML = '';
+            this.selector.append(notFoundWrapper);
+        }
+    }
+}
+export default ProductList;

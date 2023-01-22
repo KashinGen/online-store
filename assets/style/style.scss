@@ -1,0 +1,209 @@
+@import '_reset.scss';
+@import '_variables.scss';
+@import '_product.scss';
+@import '_main.scss';
+@import '_cart.scss';
+@import '_new-cart.scss';
+@import '_404.scss';
+@import '_controls.scss';
+@import '_detail.scss';
+
+.container {
+    width: 100%;
+    max-width: 1460px;
+    padding:0 30px;
+    margin:0 auto;
+}
+html {
+    height: 100%;
+}
+body {
+    color: $main;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+#app {
+    flex:1;
+}
+.header {
+    position: sticky;
+    top:0;
+    height: 80px;
+    background-color: #fff;
+    z-index: 99;
+    &__inner {
+        display: flex;
+        align-items: center;
+        height: 80px;
+        justify-content: space-between;
+
+    }
+    &__logo {
+        transition: all .3s;
+        font-weight: 500;
+        font-size: 30px;
+        line-height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        text-decoration: none;
+        &:active,
+        &:visited {
+            color: $main;
+        }
+        h2 {
+            text-shadow: 0 0 0 $main, 0 0 2px $main, 0 0 4px $main, 0 0 20px $main;
+        }
+    }
+    &__cart {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        &-info {
+            display:flex;
+            font-size: 20px;
+            line-height: 125%;
+        }
+        &-link {
+            position: relative;
+            &::before {
+                position: absolute;
+                content: attr(data-count);
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+                line-height: 25px;
+                top: -13px;
+                right: -13px;
+                font-weight: 600;
+                color: #fff;
+                background-color: $hover-color;
+                text-align: center;
+                border-radius: 50%;
+                opacity: 0;
+            }
+            &.on::before {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.footer {
+    background-color: $main;
+    padding: 20px 0;
+    &__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #FFFF;
+    }
+    &__author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        a {
+            display: flex;
+            align-items: center;
+            gap:5px;
+            cursor: pointer;
+        }
+    }
+}
+
+.loader {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content:center;
+}
+
+@keyframes ldio-paqfnpvpf4b {
+  0% { transform: rotate(0deg) }
+  50% { transform: rotate(180deg) }
+  100% { transform: rotate(360deg) }
+}
+.ldio-paqfnpvpf4b div {
+  position: absolute;
+  animation: ldio-paqfnpvpf4b 0.67s linear infinite;
+  width: 128px;
+  height: 128px;
+  top: 36px;
+  left: 36px;
+  border-radius: 50%;
+  box-shadow: 0 7px 0 0 #290908;
+  transform-origin: 64px 67.5px;
+}
+.loadingio-spinner-eclipse-az9zzj0al3w {
+  width: 200px;
+  height: 200px;
+  display: inline-block;
+  overflow: hidden;
+  background: none;
+}
+.ldio-paqfnpvpf4b {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
+  transform-origin: 0 0; /* see note above */
+}
+.ldio-paqfnpvpf4b div { box-sizing: content-box; }
+
+
+@media screen and (hover:hover) {
+
+    .header {
+        &__logo:hover {
+            svg path {
+                fill: $hover-color;
+            }
+            h2 {
+                color: $hover-color;
+                text-shadow: 0 0 0 $hover-color, 0 0 2px $hover-color, 0 0 4px $hover-color, 0 0 20px $hover-color;
+            }
+        }
+        &__cart-link:hover {
+            svg path {
+                fill: $hover-color;
+            }
+        }
+    }
+    .footer {
+        &__author {
+            a:hover {
+                color: $hover-color;
+                svg path {
+                    fill: $hover-color;
+                }
+            }
+        }
+        &__school-link:hover {
+            svg path {
+                stroke: $hover-color;
+            }
+            svg path:nth-child(1),
+            svg path:nth-child(2),
+            svg path:nth-child(3),
+            svg path:nth-child(4) {
+                fill: $hover-color;
+            }
+        }
+    }
+
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  appearance: none;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: none;
+}

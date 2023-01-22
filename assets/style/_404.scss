@@ -1,0 +1,34 @@
+.error404{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    &::after {
+        content: 'Sorry, your way is not correct';
+        margin-top: 15px;
+    }
+}
+
+.bth-error{
+    font-size: 20px;
+    width: 200px;
+    height: 3rem;
+    border: 2px solid black;
+    background-color: white;
+    border-radius: 20px;
+    margin-top: 15px;
+}
+
+@media screen and (hover: hover) {
+
+    .bth-error:hover{
+        transition: all 0.3s;
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+}
+
