@@ -1,4 +1,4 @@
-import { Controller } from "../types";
+import { Controller } from '../types';
 
 export interface URLRoute {
     [key: string | number]: {
